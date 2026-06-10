@@ -88,7 +88,7 @@ public class FloatingService extends Service {
 
             lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
             lp.x = 0;
-            lp.y = dp(8);
+            lp.y = dp(32);
             wm.updateViewLayout(floatView, lp);
         } catch (Exception e) {}
     }
@@ -111,7 +111,7 @@ public class FloatingService extends Service {
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
         lp.x = 0;
-        lp.y = dp(8);
+        lp.y = dp(32);
 
         final View pill = floatView.findViewById(R.id.float_pill);
         final View panel = floatView.findViewById(R.id.float_panel);
