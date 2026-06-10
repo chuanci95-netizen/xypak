@@ -1,6 +1,6 @@
 package com.xy.pak;
 
-import android.animation.ObjectAnimator;
+import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +22,7 @@ public class HomeFragment extends Fragment {
 
     private static final String LINK_URL = "http://518fkw.top/links/115CD2D8";
     private TextView btnStartFloat;
-    private ObjectAnimator anim1, anim2;
+    private ValueAnimator colorAnim;
 
     @Nullable
     @Override
@@ -31,41 +31,50 @@ public class HomeFragment extends Fragment {
 
         btnStartFloat = v.findViewById(R.id.btn_start_float);
 
-        View.OnClickListener openLink = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(LINK_URL));
-                    startActivity(intent);
-                } catch (Exception e) {
-                    Toast.makeText(getContext(), "打开链接失败", Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-
-        View btnGame = v.findViewById(R.id.btn_game_account);
+        // 卡片跳转链接
         View cardSafe = v.findViewById(R.id.card_safe);
-        View pillSafe = v.findViewById(R.id.pill_safe);
-
-        if (btnGame != null) btnGame.setOnClickListener(openLink);
-        if (cardSafe != null) cardSafe.setOnClickListener(openLink);
-
-        // 呼吸闪烁动画
-        if (btnGame != null) {
-            anim1 = ObjectAnimator.ofFloat(btnGame, "alpha", 1f, 0.5f, 1f);
-            anim1.setDuration(1800);
-            anim1.setRepeatCount(ValueAnimator.INFINITE);
-            anim1.setInterpolator(new LinearInterpolator());
-            anim1.start();
-        }
-        if (pillSafe != null) {
-            anim2 = ObjectAnimator.ofFloat(pillSafe, "alpha", 1f, 0.55f, 1f);
-            anim2.setDuration(1800);
-            anim2.setRepeatCount(ValueAnimator.INFINITE);
-            anim2.setInterpolator(new LinearInterpolator());
-            anim2.start();
+        if (cardSafe != null) {
+            cardSafe.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(LINK_URL));
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Toast.makeText(getContext(), "打开链接失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
 
+        // 七彩文字闪烁动画
+        final TextView textSafe = v.findViewById(R.id.text_safe);
+        if (textSafe != null) {
+            int[] colors = new int[] {
+                0xFFE11D48, // 红
+                0xFFFF8A00, // 橙
+                0xFFEAB308, // 黄
+                0xFF22C55E, // 绿
+                0xFF06B6D4, // 青
+                0xFF3B82F6, // 蓝
+                0xFF9B5BF5, // 紫
+                0xFFEC4899, // 粉
+                0xFFE11D48  // 回到红，形成循环
+            };
+            colorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), (Object[]) box(colors));
+            colorAnim.setDuration(6000);
+            colorAnim.setRepeatCount(ValueAnimator.INFINITE);
+            colorAnim.setInterpolator(new LinearInterpolator());
+            colorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    textSafe.setTextColor((Integer) animation.getAnimatedValue());
+                }
+            });
+            colorAnim.start();
+        }
+
+        // 启动悬浮窗
         btnStartFloat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,6 +82,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        // 4 个盾牌
         View.OnClickListener placeholder = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,6 +97,13 @@ public class HomeFragment extends Fragment {
         return v;
     }
 
+    /** 把 int[] 包装成 Integer[]（ValueAnimator.ofObject 不接受原生数组） */
+    private Integer[] box(int[] arr) {
+        Integer[] r = new Integer[arr.length];
+        for (int i = 0; i < arr.length; i++) r[i] = arr[i];
+        return r;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -96,8 +113,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (anim1 != null) anim1.cancel();
-        if (anim2 != null) anim2.cancel();
+        if (colorAnim != null) colorAnim.cancel();
     }
 
     private void refreshFloatBtn() {
