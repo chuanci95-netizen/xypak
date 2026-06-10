@@ -39,12 +39,11 @@
         android:padding="16dp"
         android:visibility="gone">
 
-        <!-- 顶部标题栏 -->
+        <!-- 顶部标题栏（只剩中间标题和右关闭） -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp">
-            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -52,7 +51,7 @@
                 android:layout_centerInParent="true"
                 android:text="小月注入 Ultra"
                 android:textColor="#5fa37c"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
 
             <ImageView
@@ -64,9 +63,16 @@
                 android:background="@drawable/bg_chip_battery"
                 android:padding="5dp"
                 android:src="@drawable/ic_close"/>
+
+            <!-- 隐藏占位，给电量显示用（避免 Java 代码 NPE） -->
+            <TextView
+                android:id="@+id/float_battery"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"/>
         </RelativeLayout>
 
-        <!-- 内容容器（按 tab 切换） -->
+        <!-- 内容容器 -->
         <FrameLayout
             android:id="@+id/float_content_container"
             android:layout_width="match_parent"
@@ -166,7 +172,6 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <!-- 第一行 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
