@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!-- 收起状态：小球 -->
+    <FrameLayout
+        android:id="@+id/float_ball"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_float_ball">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="月"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+    </FrameLayout>
+
+    <!-- 展开状态：灵动岛胶囊 -->
+    <LinearLayout
+        android:id="@+id/float_pill"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_float_pill"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="14dp"
+        android:paddingRight="20dp"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/dot_green"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="小月注入"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/float_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="运行中"
+            android:textColor="#5fa37c"
+            android:textSize="12sp"/>
+    </LinearLayout>
+</FrameLayout>

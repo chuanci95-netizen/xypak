@@ -3,6 +3,7 @@ package com.xy.pak;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -163,21 +164,38 @@ public class PermissionFragment extends Fragment {
         }
     }
 
+    /** 修复后的 Shizuku 安装：使用 files 目录，确保 FileProvider 能访问 */
     private void installShizukuFromAssets() {
         try {
             Context ctx = getContext();
-            File outFile = new File(ctx.getExternalCacheDir(), "shizuku.apk");
+            // 用 internal files 目录，FileProvider 默认能读
+            File outFile = new File(ctx.getFilesDir(), "shizuku.apk");
+            if (outFile.exists()) outFile.delete();
 
             InputStream in = ctx.getAssets().open("shizuku.apk");
             OutputStream out = new FileOutputStream(outFile);
             byte[] buf = new byte[8192];
             int len;
-            while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+            long total = 0;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+                total += len;
+            }
             in.close();
+            out.flush();
             out.close();
 
+            if (total <= 0 || outFile.length() <= 0) {
+                Toast.makeText(ctx, "APK 文件为空，无法安装", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            // 设置文件权限可读
+            outFile.setReadable(true, false);
+
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             Uri uri = FileProvider.getUriForFile(ctx, "com.xy.pak.fileprovider", outFile);
             intent.setDataAndType(uri, "application/vnd.android.package-archive");
             startActivity(intent);
