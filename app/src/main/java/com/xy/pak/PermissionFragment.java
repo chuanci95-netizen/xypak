@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,11 +40,9 @@ public class PermissionFragment extends Fragment {
         progressText = v.findViewById(R.id.progress_text);
         progressBar = v.findViewById(R.id.progress_bar);
 
-        // 检查 Shizuku 是否已安装
         shizukuInstalled = isShizukuInstalled();
         updateUI();
 
-        // Root 模式卡片
         v.findViewById(R.id.card_root).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -65,7 +62,6 @@ public class PermissionFragment extends Fragment {
             }
         });
 
-        // Shizuku 模式卡片
         v.findViewById(R.id.card_shizuku).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -77,7 +73,6 @@ public class PermissionFragment extends Fragment {
                     shizukuGranted = false;
                     Toast.makeText(getContext(), "已取消 Shizuku", Toast.LENGTH_SHORT).show();
                 } else {
-                    // 启动 Shizuku
                     try {
                         Intent intent = getContext().getPackageManager()
                                 .getLaunchIntentForPackage("moe.shizuku.privileged.api");
@@ -96,7 +91,6 @@ public class PermissionFragment extends Fragment {
             }
         });
 
-        // 安装 Shizuku 卡片
         v.findViewById(R.id.card_install).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,7 +98,6 @@ public class PermissionFragment extends Fragment {
             }
         });
 
-        // 游戏加速
         v.findViewById(R.id.card_game_boost).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -112,7 +105,6 @@ public class PermissionFragment extends Fragment {
             }
         });
 
-        // 网络优化
         v.findViewById(R.id.card_net_boost).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -126,7 +118,6 @@ public class PermissionFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // 从 Shizuku 返回时刷新状态
         shizukuInstalled = isShizukuInstalled();
         updateUI();
     }
@@ -141,11 +132,15 @@ public class PermissionFragment extends Fragment {
         if (shizukuGranted) count++;
         if (shizukuInstalled) count++;
 
-        progressText.setText("已授权 " + count + "/3");
-        progressBar.setProgress(count * 100 / 3);
+        if (count == 0) {
+            progressText.setText("请选择模式");
+            progressBar.setProgress(0);
+        } else {
+            progressText.setText("已授权 " + count + "/3");
+            progressBar.setProgress(count * 100 / 3);
+        }
     }
 
-    /** 申请 Root 权限 */
     private boolean requestRoot() {
         try {
             Process p = Runtime.getRuntime().exec("su");
@@ -158,7 +153,6 @@ public class PermissionFragment extends Fragment {
         }
     }
 
-    /** 检查 Shizuku 是否安装 */
     private boolean isShizukuInstalled() {
         try {
             getContext().getPackageManager()
@@ -169,13 +163,11 @@ public class PermissionFragment extends Fragment {
         }
     }
 
-    /** 从 assets 安装 Shizuku */
     private void installShizukuFromAssets() {
         try {
             Context ctx = getContext();
             File outFile = new File(ctx.getExternalCacheDir(), "shizuku.apk");
 
-            // 拷贝 APK
             InputStream in = ctx.getAssets().open("shizuku.apk");
             OutputStream out = new FileOutputStream(outFile);
             byte[] buf = new byte[8192];
@@ -184,7 +176,6 @@ public class PermissionFragment extends Fragment {
             in.close();
             out.close();
 
-            // 调起安装
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             Uri uri = FileProvider.getUriForFile(ctx, "com.xy.pak.fileprovider", outFile);
