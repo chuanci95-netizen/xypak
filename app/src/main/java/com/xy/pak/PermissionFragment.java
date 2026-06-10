@@ -136,7 +136,7 @@ public class PermissionFragment extends Fragment {
             progressText.setText("请选择模式");
             progressBar.setProgress(0);
         } else {
-            progressText.setText("已授权 " + count + "/3");
+            progressText.setText("已选择 " + count + "/3");
             progressBar.setProgress(count * 100 / 3);
         }
     }
