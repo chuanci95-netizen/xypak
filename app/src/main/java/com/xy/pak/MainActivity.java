@@ -12,10 +12,8 @@ import com.google.android.material.navigation.NavigationBarView;
 
 public class MainActivity extends AppCompatActivity {
 
-    // 菜单项 ID（用 View.generateViewId 也行，这里用固定值方便判断）
     public static final int ID_HOME = 1001;
     public static final int ID_PERM = 1002;
-    public static final int ID_SERVER = 1003;
     public static final int ID_SETTINGS = 1004;
 
     @Override
@@ -25,14 +23,11 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView nav = findViewById(R.id.bottom_nav);
 
-        // 代码方式添加菜单项
         Menu menu = nav.getMenu();
-        menu.add(0, ID_HOME, 0, "首页").setIcon(R.drawable.ic_home);
-        menu.add(0, ID_PERM, 1, "权限").setIcon(R.drawable.ic_lock);
-        menu.add(0, ID_SERVER, 2, "服务器").setIcon(R.drawable.ic_build);
-        menu.add(0, ID_SETTINGS, 3, "设置").setIcon(R.drawable.ic_settings);
+        menu.add(0, ID_HOME, 0, "主页").setIcon(R.drawable.ic_home);
+        menu.add(0, ID_PERM, 1, "权限管理").setIcon(R.drawable.ic_lock);
+        menu.add(0, ID_SETTINGS, 2, "设置").setIcon(R.drawable.ic_settings);
 
-        // 设置选中/未选中颜色
         int[][] states = new int[][] {
             new int[] {  android.R.attr.state_checked },
             new int[] { -android.R.attr.state_checked }
@@ -52,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
                 int id = item.getItemId();
                 if (id == ID_HOME) f = new HomeFragment();
                 else if (id == ID_PERM) f = new PermissionFragment();
-                else if (id == ID_SERVER) f = new ServerFragment();
                 else if (id == ID_SETTINGS) f = new SettingsFragment();
                 if (f != null) {
                     getSupportFragmentManager().beginTransaction()
