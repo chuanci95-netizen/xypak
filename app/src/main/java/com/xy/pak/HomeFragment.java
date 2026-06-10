@@ -1,5 +1,7 @@
 package com.xy.pak;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,21 +11,18 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class HomeFragment extends Fragment {
 
     private static final String LINK_URL = "http://518fkw.top/links/115CD2D8";
     private TextView btnStartFloat;
+    private ObjectAnimator anim1, anim2;
 
     @Nullable
     @Override
@@ -45,12 +44,28 @@ public class HomeFragment extends Fragment {
         };
 
         View btnGame = v.findViewById(R.id.btn_game_account);
-        if (btnGame != null) btnGame.setOnClickListener(openLink);
-
         View cardSafe = v.findViewById(R.id.card_safe);
+        View pillSafe = v.findViewById(R.id.pill_safe);
+
+        if (btnGame != null) btnGame.setOnClickListener(openLink);
         if (cardSafe != null) cardSafe.setOnClickListener(openLink);
 
-        // 悬浮窗启动/关闭
+        // 呼吸闪烁动画
+        if (btnGame != null) {
+            anim1 = ObjectAnimator.ofFloat(btnGame, "alpha", 1f, 0.5f, 1f);
+            anim1.setDuration(1800);
+            anim1.setRepeatCount(ValueAnimator.INFINITE);
+            anim1.setInterpolator(new LinearInterpolator());
+            anim1.start();
+        }
+        if (pillSafe != null) {
+            anim2 = ObjectAnimator.ofFloat(pillSafe, "alpha", 1f, 0.55f, 1f);
+            anim2.setDuration(1800);
+            anim2.setRepeatCount(ValueAnimator.INFINITE);
+            anim2.setInterpolator(new LinearInterpolator());
+            anim2.start();
+        }
+
         btnStartFloat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -58,7 +73,6 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // 4 个功能图标占位
         View.OnClickListener placeholder = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -77,6 +91,13 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         refreshFloatBtn();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (anim1 != null) anim1.cancel();
+        if (anim2 != null) anim2.cancel();
     }
 
     private void refreshFloatBtn() {

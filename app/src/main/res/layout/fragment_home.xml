@@ -126,6 +126,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="14dp"
                         android:layout_weight="1"
+                        android:id="@+id/pill_safe"
                         android:background="@drawable/bg_pill_light"
                         android:orientation="vertical"
                         android:padding="14dp">

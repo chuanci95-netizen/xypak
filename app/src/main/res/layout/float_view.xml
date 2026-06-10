@@ -3,38 +3,20 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <!-- 收起状态：小球 -->
-    <FrameLayout
-        android:id="@+id/float_ball"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/bg_float_ball">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="月"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
-    </FrameLayout>
-
-    <!-- 展开状态：灵动岛胶囊 -->
+    <!-- 收起：顶部灵动岛胶囊 -->
     <LinearLayout
         android:id="@+id/float_pill"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:background="@drawable/bg_float_pill"
+        android:layout_height="32dp"
+        android:background="@drawable/bg_float_pill_dynamic"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingLeft="14dp"
-        android:paddingRight="20dp"
-        android:visibility="gone">
+        android:paddingRight="14dp">
 
         <View
-            android:layout_width="10dp"
-            android:layout_height="10dp"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
             android:background="@drawable/dot_green"/>
 
         <TextView
@@ -43,16 +25,281 @@
             android:layout_marginLeft="8dp"
             android:text="小月注入"
             android:textColor="#FFFFFF"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/float_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
+            android:layout_marginLeft="6dp"
+            android:text="·"
+            android:textColor="#888"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
             android:text="运行中"
             android:textColor="#5fa37c"
-            android:textSize="12sp"/>
+            android:textSize="11sp"/>
+    </LinearLayout>
+
+    <!-- 展开：大面板 -->
+    <LinearLayout
+        android:id="@+id/float_panel"
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_float_panel"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <!-- 顶部标题栏 -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/dot_green"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dp"
+                    android:text="香港服"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/bg_chip_battery"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚡"
+                        android:textColor="#FF8A00"
+                        android:textSize="11sp"/>
+
+                    <TextView
+                        android:id="@+id/float_battery"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="3dp"
+                        android:text="46%"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="小月注入 Ultra"
+                android:textColor="#5fa37c"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <ImageView
+                android:id="@+id/float_close"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_chip_battery"
+                android:padding="5dp"
+                android:src="@drawable/ic_close"/>
+        </RelativeLayout>
+
+        <!-- 内容容器（按 tab 切换） -->
+        <FrameLayout
+            android:id="@+id/float_content_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp">
+
+            <!-- 注入列表 -->
+            <LinearLayout
+                android:id="@+id/page_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_tile_dark"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
+
+                    <View
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_icon_tile_green"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="12dp"
+                        android:layout_weight="1"
+                        android:text="测试"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold"/>
+
+                    <FrameLayout
+                        android:id="@+id/sw_test"
+                        android:layout_width="44dp"
+                        android:layout_height="26dp">
+
+                        <View
+                            android:id="@+id/sw_test_track"
+                            android:layout_width="44dp"
+                            android:layout_height="26dp"
+                            android:background="@drawable/switch_track_off"/>
+
+                        <View
+                            android:id="@+id/sw_test_thumb"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center_vertical|left"
+                            android:layout_marginLeft="2dp"
+                            android:background="@drawable/switch_thumb"/>
+                    </FrameLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 防封区域 -->
+            <LinearLayout
+                android:id="@+id/page_safe"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🛡"
+                    android:textSize="40sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="防封区域"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="（开发中）"
+                    android:textColor="#666"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
+            <!-- 设置区域 -->
+            <LinearLayout
+                android:id="@+id/page_settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- 第一行 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <include layout="@layout/float_setting_tile" android:id="@+id/tile1"/>
+                    <include layout="@layout/float_setting_tile" android:id="@+id/tile2"/>
+                    <include layout="@layout/float_setting_tile" android:id="@+id/tile3"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <include layout="@layout/float_setting_tile" android:id="@+id/tile4"/>
+                    <include layout="@layout/float_setting_tile" android:id="@+id/tile5"/>
+                    <include layout="@layout/float_setting_tile" android:id="@+id/tile6"/>
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- 底部 tab 栏 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tab_list"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="注入列表"
+                android:textColor="#22C55E"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tab_safe"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="防封区域"
+                android:textColor="#FF8A00"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tab_settings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="设置区域"
+                android:textColor="#4A90E2"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
     </LinearLayout>
 </FrameLayout>
