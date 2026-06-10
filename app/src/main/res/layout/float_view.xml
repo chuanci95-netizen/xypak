@@ -27,22 +27,6 @@
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:text="·"
-            android:textColor="#888"
-            android:textSize="14sp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:text="运行中"
-            android:textColor="#5fa37c"
-            android:textSize="11sp"/>
     </LinearLayout>
 
     <!-- 展开：大面板 -->

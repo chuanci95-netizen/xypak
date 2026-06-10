@@ -7,17 +7,18 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FloatingService extends Service {
 
@@ -28,7 +29,6 @@ public class FloatingService extends Service {
     private WindowManager.LayoutParams lp;
     private boolean expanded = false;
 
-    // 6 个 tile 开关状态
     private boolean[] tileOn = new boolean[6];
     private final String[] tileNames = {"悬浮窗", "游戏模式", "清理后台", "120Hz", "免打扰", "状态栏"};
     private final int[] tileIcons = {
@@ -40,7 +40,6 @@ public class FloatingService extends Service {
             R.drawable.bg_icon_tile_purple, R.drawable.bg_icon_tile_red, R.drawable.bg_icon_tile_gray
     };
 
-    // 测试开关
     private boolean testOn = false;
 
     @Override
@@ -65,16 +64,33 @@ public class FloatingService extends Service {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // 横竖屏切换时重新居中
-        if (lp != null && wm != null && floatView != null) {
-            lp.x = 0;
-            lp.y = dp(8);
-            try { wm.updateViewLayout(floatView, lp); } catch (Exception e) {}
-        }
+        // 横竖屏切换后，延迟一点再重新定位（等系统真正完成切换）
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                centerOnScreen();
+            }
+        }, 100);
     }
 
     private int dp(int v) {
         return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    /** 强制将悬浮窗居中放到屏幕顶部 */
+    private void centerOnScreen() {
+        if (lp == null || wm == null || floatView == null) return;
+        try {
+            // 用 Display 实时拿到屏幕宽度（最准确）
+            DisplayMetrics dm = new DisplayMetrics();
+            Display display = wm.getDefaultDisplay();
+            display.getRealMetrics(dm);
+
+            lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+            lp.x = 0;
+            lp.y = dp(8);
+            wm.updateViewLayout(floatView, lp);
+        } catch (Exception e) {}
     }
 
     private void showFloat() {
@@ -89,7 +105,9 @@ public class FloatingService extends Service {
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 type,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
         lp.x = 0;
@@ -100,7 +118,6 @@ public class FloatingService extends Service {
         final ImageView closeBtn = floatView.findViewById(R.id.float_close);
         final TextView batteryText = floatView.findViewById(R.id.float_battery);
 
-        // tab
         final TextView tabList = floatView.findViewById(R.id.tab_list);
         final TextView tabSafe = floatView.findViewById(R.id.tab_safe);
         final TextView tabSettings = floatView.findViewById(R.id.tab_settings);
@@ -108,7 +125,6 @@ public class FloatingService extends Service {
         final View pageSafe = floatView.findViewById(R.id.page_safe);
         final View pageSettings = floatView.findViewById(R.id.page_settings);
 
-        // 测试开关
         final View swTestTrack = floatView.findViewById(R.id.sw_test_track);
         final View swTestThumb = floatView.findViewById(R.id.sw_test_thumb);
         floatView.findViewById(R.id.sw_test).setOnClickListener(new View.OnClickListener() {
@@ -119,7 +135,6 @@ public class FloatingService extends Service {
             }
         });
 
-        // 初始化 6 个磁贴
         int[] tileIds = {R.id.tile1, R.id.tile2, R.id.tile3, R.id.tile4, R.id.tile5, R.id.tile6};
         for (int i = 0; i < 6; i++) {
             final int idx = i;
@@ -143,37 +158,35 @@ public class FloatingService extends Service {
             });
         }
 
-        // 初始 pill
         pill.setVisibility(View.VISIBLE);
         panel.setVisibility(View.GONE);
 
-        // 点击 pill 展开
         pill.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 expanded = true;
                 pill.setVisibility(View.GONE);
                 panel.setVisibility(View.VISIBLE);
-                // 刷新电量
                 try {
                     BatteryManager bm = (BatteryManager) getSystemService(BATTERY_SERVICE);
                     int level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
                     batteryText.setText(level + "%");
                 } catch (Exception e) {}
+                // 展开后重新居中
+                centerOnScreen();
             }
         });
 
-        // 关闭按钮：收回 pill
         closeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 expanded = false;
                 panel.setVisibility(View.GONE);
                 pill.setVisibility(View.VISIBLE);
+                centerOnScreen();
             }
         });
 
-        // tab 切换
         View.OnClickListener tabClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -195,7 +208,6 @@ public class FloatingService extends Service {
         }
     }
 
-    /** 切换 iOS 风格开关：thumb 移动 + track 颜色 */
     private void updateSwitch(View track, View thumb, boolean on, int trackWidthDp) {
         track.setBackgroundResource(on ? R.drawable.switch_track_on : R.drawable.switch_track_off);
         float dx = on ? dp(trackWidthDp - 22 - 2) : 0;
