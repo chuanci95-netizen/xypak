@@ -20,9 +20,13 @@ import androidx.fragment.app.Fragment;
 
 public class HomeFragment extends Fragment {
 
-    private static final String LINK_URL = "http://518fkw.top/links/115CD2D8";
+    private static final String LINK_DATA = "http://518fkw.top/links/115CD2D8";
+    private static final String LINK_BUY = "http://518fkw.top/links/1A2C3839";
+    private static final String LINK_CHANNEL = "https://t.me/XYZDZR";
+
     private TextView btnStartFloat;
-    private ValueAnimator colorAnim;
+    private ValueAnimator animSafe;
+    private ValueAnimator animBuy;
 
     @Nullable
     @Override
@@ -31,44 +35,39 @@ public class HomeFragment extends Fragment {
 
         btnStartFloat = v.findViewById(R.id.btn_start_float);
 
-        View.OnClickListener openLink = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(LINK_URL));
-                    startActivity(intent);
-                } catch (Exception e) {
-                    Toast.makeText(getContext(), "打开链接失败", Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-
-        // 大卡片跳转
-        View cardSafe = v.findViewById(R.id.card_safe);
-        if (cardSafe != null) cardSafe.setOnClickListener(openLink);
-
-        // 公告条目 1 跳转
-        View notice1 = v.findViewById(R.id.notice_1);
-        if (notice1 != null) notice1.setOnClickListener(openLink);
-
-        // 七彩文字闪烁动画
-        final TextView textSafe = v.findViewById(R.id.text_safe);
-        if (textSafe != null) {
-            int[] colors = new int[] {
-                0xFFE11D48, 0xFFFF8A00, 0xFFEAB308, 0xFF22C55E,
-                0xFF06B6D4, 0xFF3B82F6, 0xFF9B5BF5, 0xFFEC4899, 0xFFE11D48
-            };
-            colorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), (Object[]) box(colors));
-            colorAnim.setDuration(6000);
-            colorAnim.setRepeatCount(ValueAnimator.INFINITE);
-            colorAnim.setInterpolator(new LinearInterpolator());
-            colorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        // 「购买小月内部」→ 跳转购买链接
+        final TextView textBuy = v.findViewById(R.id.text_buy);
+        if (textBuy != null) {
+            textBuy.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    textSafe.setTextColor((Integer) animation.getAnimatedValue());
+                public void onClick(View view) {
+                    openUrl(LINK_BUY);
                 }
             });
-            colorAnim.start();
+            animBuy = startColorAnim(textBuy);
+        }
+
+        // 「和平高质量数据号」→ 跳转数据号链接（同时七彩）
+        final TextView textSafe = v.findViewById(R.id.text_safe);
+        if (textSafe != null) {
+            textSafe.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    openUrl(LINK_DATA);
+                }
+            });
+            animSafe = startColorAnim(textSafe);
+        }
+
+        // 公告条目 1 → 跳转 Telegram 频道
+        View notice1 = v.findViewById(R.id.notice_1);
+        if (notice1 != null) {
+            notice1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    openUrl(LINK_CHANNEL);
+                }
+            });
         }
 
         btnStartFloat.setOnClickListener(new View.OnClickListener() {
@@ -81,10 +80,37 @@ public class HomeFragment extends Fragment {
         return v;
     }
 
-    private Integer[] box(int[] arr) {
-        Integer[] r = new Integer[arr.length];
-        for (int i = 0; i < arr.length; i++) r[i] = arr[i];
-        return r;
+    private void openUrl(String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "打开链接失败", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** 给 TextView 启动七彩循环动画 */
+    private ValueAnimator startColorAnim(final TextView target) {
+        int[] colors = new int[] {
+            0xFFE11D48, 0xFFFF8A00, 0xFFEAB308, 0xFF22C55E,
+            0xFF06B6D4, 0xFF3B82F6, 0xFF9B5BF5, 0xFFEC4899, 0xFFE11D48
+        };
+        Integer[] boxed = new Integer[colors.length];
+        for (int i = 0; i < colors.length; i++) boxed[i] = colors[i];
+
+        ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), (Object[]) boxed);
+        anim.setDuration(6000);
+        anim.setRepeatCount(ValueAnimator.INFINITE);
+        anim.setInterpolator(new LinearInterpolator());
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                target.setTextColor((Integer) animation.getAnimatedValue());
+            }
+        });
+        anim.start();
+        return anim;
     }
 
     @Override
@@ -96,7 +122,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (colorAnim != null) colorAnim.cancel();
+        if (animSafe != null) animSafe.cancel();
+        if (animBuy != null) animBuy.cancel();
     }
 
     private void refreshFloatBtn() {
