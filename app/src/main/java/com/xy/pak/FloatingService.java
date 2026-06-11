@@ -7,6 +7,9 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.BatteryManager;
 import android.media.ToneGenerator;
+import android.media.RingtoneManager;
+import android.media.Ringtone;
+import android.net.Uri;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
@@ -336,11 +339,10 @@ public class FloatingService extends Service {
 
     private void playBeep() {
         try {
-            ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 90);
-            tg.startTone(ToneGenerator.TONE_PROP_BEEP, 150);
-            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override public void run() { try { tg.release(); } catch (Exception e) {} }
-            }, 300);
+            Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            if (uri == null) uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), uri);
+            if (r != null) r.play();
         } catch (Exception e) {}
     }
 
