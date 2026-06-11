@@ -123,6 +123,7 @@ public class FloatingService extends Service {
         final View tabSafe = floatView.findViewById(R.id.tab_safe);
         final View tabSettings = floatView.findViewById(R.id.tab_settings);
         final View pageList = floatView.findViewById(R.id.page_list);
+        final View pageOrigin = floatView.findViewById(R.id.page_origin);
         final View pageSafe = floatView.findViewById(R.id.page_safe);
         final View pageSettings = floatView.findViewById(R.id.page_settings);
 
@@ -205,11 +206,13 @@ public class FloatingService extends Service {
             public void onClick(View v) {
                 int id = v.getId();
                 pageList.setVisibility(id == R.id.tab_list ? View.VISIBLE : View.GONE);
+                pageOrigin.setVisibility(id == R.id.tab_origin ? View.VISIBLE : View.GONE);
                 pageSafe.setVisibility(id == R.id.tab_safe ? View.VISIBLE : View.GONE);
                 pageSettings.setVisibility(id == R.id.tab_settings ? View.VISIBLE : View.GONE);
             }
         };
         tabList.setOnClickListener(tabClick);
+        floatView.findViewById(R.id.tab_origin).setOnClickListener(tabClick);
         tabSafe.setOnClickListener(tabClick);
         tabSettings.setOnClickListener(tabClick);
 
