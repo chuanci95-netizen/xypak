@@ -44,20 +44,14 @@ public class FloatingService extends Service {
     };
 
             // 初始化 6 个注入卡片
-            int[] injectIds = {R.id.inject1, R.id.inject2, R.id.inject3, R.id.inject4, R.id.inject5, R.id.inject6};
-            int[] injectBgs = {R.drawable.bg_inject_green, R.drawable.bg_inject_purple, R.drawable.bg_inject_blue, R.drawable.bg_inject_orange, R.drawable.bg_inject_red, R.drawable.bg_inject_cyan};
-            int[] injectIcons = {R.drawable.ic_inject_rocket, R.drawable.ic_inject_shield, R.drawable.ic_inject_target, R.drawable.ic_inject_gamepad, R.drawable.ic_inject_bell, R.drawable.ic_inject_lock};
+            int[] swIds = {R.id.inject_sw1, R.id.inject_sw2, R.id.inject_sw3, R.id.inject_sw4, R.id.inject_sw5, R.id.inject_sw6};
+            int[] trackIds = {R.id.inject_track1, R.id.inject_track2, R.id.inject_track3, R.id.inject_track4, R.id.inject_track5, R.id.inject_track6};
+            int[] thumbIds = {R.id.inject_thumb1, R.id.inject_thumb2, R.id.inject_thumb3, R.id.inject_thumb4, R.id.inject_thumb5, R.id.inject_thumb6};
             for (int i = 0; i < 6; i++) {
-                View card = floatView.findViewById(injectIds[i]);
-                card.setBackgroundResource(injectBgs[i]);
-                TextView name = card.findViewById(R.id.inject_name);
-                ImageView icon = card.findViewById(R.id.inject_icon);
-                name.setText(injectNames[i]);
-                icon.setImageResource(injectIcons[i]);
-                final View track = card.findViewById(R.id.inject_track);
-                final View thumb = card.findViewById(R.id.inject_thumb);
+                final View track = floatView.findViewById(trackIds[i]);
+                final View thumb = floatView.findViewById(thumbIds[i]);
                 final int idx = i;
-                card.findViewById(R.id.inject_switch).setOnClickListener(new View.OnClickListener() {
+                floatView.findViewById(swIds[i]).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         injectOn[idx] = !injectOn[idx];
@@ -155,20 +149,14 @@ public class FloatingService extends Service {
         final View pageSettings = floatView.findViewById(R.id.page_settings);
 
             // 初始化 6 个注入卡片
-            int[] injectIds = {R.id.inject1, R.id.inject2, R.id.inject3, R.id.inject4, R.id.inject5, R.id.inject6};
-            int[] injectBgs = {R.drawable.bg_inject_green, R.drawable.bg_inject_purple, R.drawable.bg_inject_blue, R.drawable.bg_inject_orange, R.drawable.bg_inject_red, R.drawable.bg_inject_cyan};
-            int[] injectIcons = {R.drawable.ic_inject_rocket, R.drawable.ic_inject_shield, R.drawable.ic_inject_target, R.drawable.ic_inject_gamepad, R.drawable.ic_inject_bell, R.drawable.ic_inject_lock};
+            int[] swIds = {R.id.inject_sw1, R.id.inject_sw2, R.id.inject_sw3, R.id.inject_sw4, R.id.inject_sw5, R.id.inject_sw6};
+            int[] trackIds = {R.id.inject_track1, R.id.inject_track2, R.id.inject_track3, R.id.inject_track4, R.id.inject_track5, R.id.inject_track6};
+            int[] thumbIds = {R.id.inject_thumb1, R.id.inject_thumb2, R.id.inject_thumb3, R.id.inject_thumb4, R.id.inject_thumb5, R.id.inject_thumb6};
             for (int i = 0; i < 6; i++) {
-                View card = floatView.findViewById(injectIds[i]);
-                card.setBackgroundResource(injectBgs[i]);
-                TextView name = card.findViewById(R.id.inject_name);
-                ImageView icon = card.findViewById(R.id.inject_icon);
-                name.setText(injectNames[i]);
-                icon.setImageResource(injectIcons[i]);
-                final View track = card.findViewById(R.id.inject_track);
-                final View thumb = card.findViewById(R.id.inject_thumb);
+                final View track = floatView.findViewById(trackIds[i]);
+                final View thumb = floatView.findViewById(thumbIds[i]);
                 final int idx = i;
-                card.findViewById(R.id.inject_switch).setOnClickListener(new View.OnClickListener() {
+                floatView.findViewById(swIds[i]).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         injectOn[idx] = !injectOn[idx];
