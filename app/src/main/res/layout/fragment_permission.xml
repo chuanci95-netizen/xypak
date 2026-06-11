@@ -140,12 +140,10 @@
                 <FrameLayout
                     android:layout_width="28dp"
                     android:layout_height="28dp">
-
                     <View
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:background="@drawable/bg_circle_outline"/>
-
                     <TextView
                         android:id="@+id/check_root"
                         android:layout_width="28dp"
@@ -215,90 +213,12 @@
                 <FrameLayout
                     android:layout_width="28dp"
                     android:layout_height="28dp">
-
                     <View
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:background="@drawable/bg_circle_outline"/>
-
                     <TextView
                         android:id="@+id/check_shizuku"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/bg_circle_green"
-                        android:gravity="center"
-                        android:text="✓"
-                        android:textColor="#fff"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:visibility="invisible"/>
-                </FrameLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 安装 Shizuku -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/card_install"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            app:cardBackgroundColor="#FFFFFF"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="@drawable/bg_icon_soft"
-                    android:gravity="center"
-                    android:text="⬇"
-                    android:textColor="#5B7EF5"
-                    android:textSize="22sp"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="安装 Shizuku"
-                        android:textColor="#111"
-                        android:textSize="17sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:text="从内置包安装 Shizuku 服务"
-                        android:textColor="#888"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-
-                <FrameLayout
-                    android:layout_width="28dp"
-                    android:layout_height="28dp">
-
-                    <View
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/bg_circle_outline"/>
-
-                    <TextView
-                        android:id="@+id/check_install"
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:background="@drawable/bg_circle_green"
@@ -336,7 +256,7 @@
                 android:textStyle="bold"/>
         </LinearLayout>
 
-        <!-- 安装 Shizuku 快捷 -->
+        <!-- 安装 Shizuku -->
         <androidx.cardview.widget.CardView
             android:id="@+id/tool_install_shizuku"
             android:layout_width="match_parent"
@@ -372,6 +292,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tool_install_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="安装 Shizuku"
@@ -380,6 +301,7 @@
                         android:textStyle="bold"/>
 
                     <TextView
+                        android:id="@+id/tool_install_desc"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
@@ -471,7 +393,7 @@
                 android:id="@+id/txt_bottom_hint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="请先安装 Shizuku"
+                android:text=""
                 android:textColor="#888"
                 android:textSize="13sp"/>
         </LinearLayout>
