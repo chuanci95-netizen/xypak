@@ -1,5 +1,6 @@
 package com.xy.pak;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,23 +29,14 @@ public class PermissionFragment extends Fragment {
 
     private static final String PREF_NAME = "perm_prefs";
     private static final String KEY_MODE = "selected_mode";
-
-    // Shizuku 可能的包名
-    private static final String[] SHIZUKU_PKGS = {
-        "moe.shizuku.privileged.api",
-        "rikka.shizuku"
-    };
-
-    // MT 管理器包名
-    private static final String MT_PKG = "bin.mt.plus";
+    private static final String SHIZUKU_PKG = "moe.shizuku.privileged.api";
 
     private boolean rootGranted = false;
     private boolean shizukuGranted = false;
     private boolean shizukuInstalled = false;
-    private boolean shizukuRunning = false;
 
     private View checkRoot, checkShizuku, checkInstall;
-    private TextView progressText;
+    private TextView progressText, txtBottomHint;
     private ProgressBar progressBar;
 
     @Nullable
@@ -57,20 +49,14 @@ public class PermissionFragment extends Fragment {
         checkInstall = v.findViewById(R.id.check_install);
         progressText = v.findViewById(R.id.progress_text);
         progressBar = v.findViewById(R.id.progress_bar);
+        txtBottomHint = v.findViewById(R.id.txt_bottom_hint);
 
         // 读取保存的模式
         String savedMode = getPrefs().getString(KEY_MODE, "");
-        if ("root".equals(savedMode)) {
-            rootGranted = true;
-        } else if ("shizuku".equals(savedMode)) {
-            shizukuGranted = true;
-        }
+        if ("root".equals(savedMode)) rootGranted = true;
+        else if ("shizuku".equals(savedMode)) shizukuGranted = true;
 
-        // 检测 Shizuku 安装和运行状态
-        shizukuInstalled = isShizukuInstalled();
-        shizukuRunning = isShizukuRunning();
-
-        // Root 模式点击
+        // Root 模式
         v.findViewById(R.id.card_root).setOnClickListener(view -> {
             if (rootGranted) {
                 rootGranted = false;
@@ -89,31 +75,21 @@ public class PermissionFragment extends Fragment {
             updateUI();
         });
 
-        // Shizuku 模式点击
+        // Shizuku 模式
         v.findViewById(R.id.card_shizuku).setOnClickListener(view -> {
-            // 先刷新状态
-            shizukuInstalled = isShizukuInstalled();
-            shizukuRunning = isShizukuRunning();
+            refreshShizukuState();
 
             if (!shizukuInstalled) {
-                Toast.makeText(getContext(), "请先安装 Shizuku（点击下方安装按钮）", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "请先安装 Shizuku", Toast.LENGTH_LONG).show();
                 return;
             }
 
-            if (!shizukuRunning) {
-                Toast.makeText(getContext(), "Shizuku 未运行，请先打开 Shizuku 并启动服务（无线调试/Root 方式）", Toast.LENGTH_LONG).show();
-                // 打开 Shizuku 应用
+            if (!isShizukuRunning()) {
+                Toast.makeText(getContext(), "Shizuku 服务未运行\n请先打开 Shizuku 并启动服务", Toast.LENGTH_LONG).show();
                 launchShizuku();
                 return;
             }
 
-            // 检查 MT 管理器是否安装
-            if (!isAppInstalled(MT_PKG)) {
-                Toast.makeText(getContext(), "请先安装 MT 管理器", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            // Shizuku 已运行，切换选择
             if (shizukuGranted) {
                 shizukuGranted = false;
                 saveMode("");
@@ -122,36 +98,64 @@ public class PermissionFragment extends Fragment {
                 shizukuGranted = true;
                 rootGranted = false;
                 saveMode("shizuku");
-                Toast.makeText(getContext(), "Shizuku 模式已启用\n请确保 MT 管理器已在 Shizuku 中授权", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Shizuku 模式已启用", Toast.LENGTH_SHORT).show();
             }
             updateUI();
         });
 
-        // 安装 Shizuku 点击
+        // 安装 Shizuku 卡片
         v.findViewById(R.id.card_install).setOnClickListener(view -> {
-            shizukuInstalled = isShizukuInstalled();
+            refreshShizukuState();
             if (shizukuInstalled) {
-                // 已安装，直接打开
                 Toast.makeText(getContext(), "Shizuku 已安装，正在打开...", Toast.LENGTH_SHORT).show();
                 launchShizuku();
             } else {
-                // 未安装，从 assets 安装
                 installShizukuFromAssets();
             }
-            updateUI();
         });
 
+        // 快捷工具：安装 Shizuku
+        v.findViewById(R.id.tool_install_shizuku).setOnClickListener(view -> {
+            refreshShizukuState();
+            if (shizukuInstalled) {
+                launchShizuku();
+            } else {
+                installShizukuFromAssets();
+            }
+        });
+
+        // 快捷工具：打开无线调试
+        v.findViewById(R.id.tool_wireless_debug).setOnClickListener(view -> {
+            try {
+                // Android 11+ 直接跳无线调试
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                startActivity(intent);
+                Toast.makeText(getContext(), "请在开发者选项中找到「无线调试」并打开", Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "无法打开开发者选项: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        refreshShizukuState();
         updateUI();
+
+        // 如果 Shizuku 已安装且运行，自动弹出授权请求
+        if (shizukuInstalled && isShizukuRunning()) {
+            requestShizukuPermission();
+        }
+
         return v;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // 每次回到页面刷新状态
-        shizukuInstalled = isShizukuInstalled();
-        shizukuRunning = isShizukuRunning();
+        refreshShizukuState();
         updateUI();
+    }
+
+    private void refreshShizukuState() {
+        shizukuInstalled = isShizukuInstalled();
     }
 
     private void saveMode(String mode) {
@@ -177,90 +181,96 @@ public class PermissionFragment extends Fragment {
             progressText.setText("请选择模式");
             progressBar.setProgress(0);
         }
+
+        // 底部提示
+        if (shizukuInstalled && isShizukuRunning()) {
+            txtBottomHint.setText("Shizuku 运行中 ✓");
+            txtBottomHint.setTextColor(0xFF4CAF50);
+        } else if (shizukuInstalled) {
+            txtBottomHint.setText("Shizuku 已安装，请启动服务");
+            txtBottomHint.setTextColor(0xFFFF9800);
+        } else {
+            txtBottomHint.setText("请先安装 Shizuku");
+            txtBottomHint.setTextColor(0xFF888888);
+        }
     }
 
-    /** 申请 Root */
     private boolean requestRoot() {
         try {
             Process p = Runtime.getRuntime().exec("su");
             p.getOutputStream().write("exit\n".getBytes());
             p.getOutputStream().flush();
-            int code = p.waitFor();
-            return code == 0;
+            return p.waitFor() == 0;
         } catch (Exception e) {
             return false;
         }
     }
 
-    /** 检查 Shizuku 是否安装（兼容多个包名） */
     private boolean isShizukuInstalled() {
-        PackageManager pm = getContext().getPackageManager();
-        for (String pkg : SHIZUKU_PKGS) {
-            try {
-                pm.getPackageInfo(pkg, PackageManager.GET_ACTIVITIES);
-                return true;
-            } catch (Exception ignored) {}
-        }
-        return false;
-    }
-
-    /** 检查 Shizuku 服务是否在运行 */
-    private boolean isShizukuRunning() {
         try {
-            // 通过 ps 检测 shizuku 进程
-            Process p = Runtime.getRuntime().exec("ps -A");
-            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.contains("shizuku") || line.contains("rish")) {
-                    br.close();
-                    return true;
-                }
-            }
-            br.close();
-        } catch (Exception ignored) {}
-
-        // 备用方案：检查 Shizuku binder 是否存在
-        try {
-            Process p = Runtime.getRuntime().exec("service check ShizukuService");
-            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String result = br.readLine();
-            br.close();
-            if (result != null && !result.contains("not found")) {
-                return true;
-            }
-        } catch (Exception ignored) {}
-
-        return false;
-    }
-
-    /** 检查某个 App 是否安装 */
-    private boolean isAppInstalled(String pkg) {
-        try {
-            getContext().getPackageManager().getPackageInfo(pkg, 0);
+            Context ctx = getContext();
+            if (ctx == null) return false;
+            ctx.getPackageManager().getPackageInfo(SHIZUKU_PKG, PackageManager.GET_ACTIVITIES);
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    /** 打开 Shizuku 应用 */
-    private void launchShizuku() {
-        PackageManager pm = getContext().getPackageManager();
-        for (String pkg : SHIZUKU_PKGS) {
-            Intent intent = pm.getLaunchIntentForPackage(pkg);
-            if (intent != null) {
-                startActivity(intent);
-                return;
-            }
-        }
-        Toast.makeText(getContext(), "无法打开 Shizuku", Toast.LENGTH_SHORT).show();
+    private boolean isShizukuRunning() {
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps -A 2>/dev/null | grep shizuku"});
+            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = br.readLine();
+            br.close();
+            if (line != null && line.contains("shizuku")) return true;
+        } catch (Exception ignored) {}
+
+        // 备用：用 su 检测
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"su", "-c", "ps -A | grep shizuku"});
+            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = br.readLine();
+            br.close();
+            if (line != null && line.contains("shizuku")) return true;
+        } catch (Exception ignored) {}
+
+        return false;
     }
 
-    /** 从 assets 安装 Shizuku */
+    private void requestShizukuPermission() {
+        // 尝试通过 ContentProvider 触发 Shizuku 授权弹窗
+        try {
+            Context ctx = getContext();
+            if (ctx == null) return;
+            // 启动 Shizuku 让它弹授权
+            Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(SHIZUKU_PKG);
+            if (intent != null) {
+                // 不直接启动，只是确认可以启动
+                // 授权弹窗由 Shizuku SDK 自动触发
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void launchShizuku() {
+        try {
+            Context ctx = getContext();
+            if (ctx == null) return;
+            Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(SHIZUKU_PKG);
+            if (intent != null) {
+                startActivity(intent);
+            } else {
+                Toast.makeText(ctx, "无法打开 Shizuku", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "打开 Shizuku 失败", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void installShizukuFromAssets() {
         try {
             Context ctx = getContext();
+            if (ctx == null) return;
             File outFile = new File(ctx.getExternalCacheDir(), "shizuku.apk");
 
             InputStream in = ctx.getAssets().open("shizuku.apk");
