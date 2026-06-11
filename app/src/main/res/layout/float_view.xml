@@ -202,41 +202,22 @@
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tab_list"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="注入列表"
-                android:textColor="#22C55E"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/tab_safe"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="防封区域"
-                android:textColor="#FF8A00"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/tab_settings"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="设置区域"
-                android:textColor="#4A90E2"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
+                <LinearLayout android:id="@+id/tab_list" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="6dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_tab_list"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="注入列表" android:textColor="#22C55E" android:textSize="11sp" android:textStyle="bold"/>
+                </LinearLayout>
+                <LinearLayout android:id="@+id/tab_origin" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="6dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_tab_layer"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="原版列表" android:textColor="#888888" android:textSize="11sp"/>
+                </LinearLayout>
+                <LinearLayout android:id="@+id/tab_safe" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="6dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_shield"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="防封列表" android:textColor="#888888" android:textSize="11sp"/>
+                </LinearLayout>
+                <LinearLayout android:id="@+id/tab_settings" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="6dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_settings"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="设置列表" android:textColor="#888888" android:textSize="11sp"/>
+                </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
