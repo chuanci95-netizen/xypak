@@ -217,11 +217,10 @@ public class FloatingService extends Service {
 
 
     /** 从 assets 提取 pak 到 app 内部目录 */
-    private String extractAssetToInternal() {
+    private String extractAssetToInternal(String assetName) {
         try {
-            java.io.File outFile = new java.io.File(getFilesDir(), PAK_NAME);
-            if (outFile.exists() && outFile.length() > 0) return outFile.getAbsolutePath();
-            java.io.InputStream in = getAssets().open(PAK_NAME);
+            java.io.File outFile = new java.io.File(getFilesDir(), assetName);
+            java.io.InputStream in = getAssets().open(assetName);
             java.io.FileOutputStream out = new java.io.FileOutputStream(outFile);
             byte[] buf = new byte[8192];
             int len;
@@ -242,7 +241,7 @@ public class FloatingService extends Service {
             @Override
             public void run() {
                 try {
-                    String src = extractAssetToInternal();
+                    String src = extractAssetToInternal("pak_on.pak");
                     if (src == null || !new File(src).exists()) {
                         showMsg("提取文件失败");
                         return;
@@ -261,7 +260,7 @@ public class FloatingService extends Service {
                     int code = p.waitFor();
 
                     if (code == 0) {
-                        showMsg("内透[红] 已注入 ✓");
+                        showMsg("内透已开启 ✓");
                     } else {
                         showMsg("注入失败，请确认 Root 权限");
                     }
@@ -278,15 +277,21 @@ public class FloatingService extends Service {
             @Override
             public void run() {
                 try {
+                    String src = extractAssetToInternal("pak_off.pak");
+                    if (src == null || !new java.io.File(src).exists()) {
+                        showMsg("提取原版文件失败");
+                        return;
+                    }
                     Process p = Runtime.getRuntime().exec("su");
                     DataOutputStream os = new DataOutputStream(p.getOutputStream());
-                    os.writeBytes("rm -f '" + DST_DIR + "/" + PAK_NAME + "'\n");
+                    os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
+                    os.writeBytes("cp '" + src + "' '" + DST_DIR + "/" + PAK_NAME + "'\n");
+                    os.writeBytes("chmod 644 '" + DST_DIR + "/" + PAK_NAME + "'\n");
                     os.writeBytes("exit\n");
                     os.flush();
                     int code = p.waitFor();
-
                     if (code == 0) {
-                        showMsg("内透[红] 已关闭 ✓");
+                        showMsg("内透已关闭 ✓");
                     } else {
                         showMsg("关闭失败，请确认 Root 权限");
                     }
