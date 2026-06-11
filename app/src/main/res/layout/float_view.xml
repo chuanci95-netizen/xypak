@@ -1,85 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-
-    <!-- 收起：顶部灵动岛胶囊 -->
-    <LinearLayout
-        android:id="@+id/float_pill"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:background="@drawable/bg_float_pill_dynamic"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingLeft="14dp"
-        android:paddingRight="14dp">
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:background="@drawable/dot_green"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:text="@XYZRNB"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:textStyle="bold"/>
-    </LinearLayout>
-
-    <!-- 展开：大面板 -->
-    <LinearLayout
-        android:id="@+id/float_panel"
-        android:layout_width="340dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_float_panel"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:visibility="gone">
-
-        <!-- 顶部标题栏（只剩中间标题和右关闭） -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="小月注入 Ultra"
-                android:textColor="#5fa37c"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-
-            <ImageView
-                android:id="@+id/float_close"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_chip_battery"
-                android:padding="5dp"
-                android:src="@drawable/ic_close"/>
-
-            <!-- 隐藏占位，给电量显示用（避免 Java 代码 NPE） -->
-            <TextView
-                android:id="@+id/float_battery"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone"/>
-        </RelativeLayout>
-
-        <!-- 内容容器 -->
-        <FrameLayout
-            android:id="@+id/float_content_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp">
-
-            <!-- 注入列表 -->
+            <!-- 注入列表（2x3 网格） -->
             <LinearLayout
                 android:id="@+id/page_list"
                 android:layout_width="match_parent"
@@ -89,155 +8,25 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_tile_dark"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="14dp">
-
-                    <View
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_icon_tile_green"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="12dp"
-                        android:layout_weight="1"
-                        android:text="开启内透"
-                        android:textColor="#FFFFFF"
-                        android:textSize="15sp"
-                        android:textStyle="bold"/>
-
-                    <FrameLayout
-                        android:id="@+id/sw_test"
-                        android:layout_width="44dp"
-                        android:layout_height="26dp">
-
-                        <View
-                            android:id="@+id/sw_test_track"
-                            android:layout_width="44dp"
-                            android:layout_height="26dp"
-                            android:background="@drawable/switch_track_off"/>
-
-                        <View
-                            android:id="@+id/sw_test_thumb"
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:layout_gravity="center_vertical|left"
-                            android:layout_marginLeft="2dp"
-                            android:background="@drawable/switch_thumb"/>
-                    </FrameLayout>
+                    android:orientation="horizontal">
+                    <include layout="@layout/float_inject_tile" android:id="@+id/inject1"/>
+                    <include layout="@layout/float_inject_tile" android:id="@+id/inject2"/>
                 </LinearLayout>
-            </LinearLayout>
-
-            <!-- 防封区域 -->
-            <LinearLayout
-                android:id="@+id/page_safe"
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🛡"
-                    android:textSize="40sp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="防封区域"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="（开发中）"
-                    android:textColor="#666"
-                    android:textSize="12sp"/>
-            </LinearLayout>
-
-            <!-- 设置区域 -->
-            <LinearLayout
-                android:id="@+id/page_settings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-
-                    <include layout="@layout/float_setting_tile" android:id="@+id/tile1"/>
-                    <include layout="@layout/float_setting_tile" android:id="@+id/tile2"/>
-                    <include layout="@layout/float_setting_tile" android:id="@+id/tile3"/>
+                    <include layout="@layout/float_inject_tile" android:id="@+id/inject3"/>
+                    <include layout="@layout/float_inject_tile" android:id="@+id/inject4"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     android:orientation="horizontal">
-
-                    <include layout="@layout/float_setting_tile" android:id="@+id/tile4"/>
-                    <include layout="@layout/float_setting_tile" android:id="@+id/tile5"/>
-                    <include layout="@layout/float_setting_tile" android:id="@+id/tile6"/>
+                    <include layout="@layout/float_inject_tile" android:id="@+id/inject5"/>
+                    <include layout="@layout/float_inject_tile" android:id="@+id/inject6"/>
                 </LinearLayout>
             </LinearLayout>
-        </FrameLayout>
 
-        <!-- 底部 tab 栏 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tab_list"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="注入列表"
-                android:textColor="#22C55E"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/tab_safe"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="防封区域"
-                android:textColor="#FF8A00"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/tab_settings"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="设置区域"
-                android:textColor="#4A90E2"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-    </LinearLayout>
-</FrameLayout>

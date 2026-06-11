@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -32,7 +33,7 @@ public class FloatingService extends Service {
     private boolean expanded = false;
 
     private boolean[] tileOn = new boolean[6];
-    private final String[] tileNames = {"悬浮窗", "游戏模式", "清理后台", "120Hz", "免打扰", "状态栏"};
+    private final String[] injectNames = {"红色内透", "至尊美化", "裸奔范围0.35", "功能文件", "测试", "测试"};
     private final int[] tileIcons = {
             R.drawable.ic_rocket, R.drawable.ic_bolt, R.drawable.ic_refresh,
             R.drawable.ic_wrench, R.drawable.ic_bell, R.drawable.ic_lock_status
@@ -42,8 +43,35 @@ public class FloatingService extends Service {
             R.drawable.bg_icon_tile_purple, R.drawable.bg_icon_tile_red, R.drawable.bg_icon_tile_gray
     };
 
-    // 内透[红] 开关状态
-    private boolean injectRedOn = false;
+            // 初始化 6 个注入卡片
+            int[] injectIds = {R.id.inject1, R.id.inject2, R.id.inject3, R.id.inject4, R.id.inject5, R.id.inject6};
+            int[] injectBgs = {R.drawable.bg_inject_green, R.drawable.bg_inject_purple, R.drawable.bg_inject_blue, R.drawable.bg_inject_orange, R.drawable.bg_inject_red, R.drawable.bg_inject_cyan};
+            int[] injectIcons = {R.drawable.ic_inject_rocket, R.drawable.ic_inject_shield, R.drawable.ic_inject_target, R.drawable.ic_inject_gamepad, R.drawable.ic_inject_bell, R.drawable.ic_inject_lock};
+            for (int i = 0; i < 6; i++) {
+                View card = floatView.findViewById(injectIds[i]);
+                card.setBackgroundResource(injectBgs[i]);
+                TextView name = card.findViewById(R.id.inject_name);
+                ImageView icon = card.findViewById(R.id.inject_icon);
+                name.setText(injectNames[i]);
+                icon.setImageResource(injectIcons[i]);
+                final View track = card.findViewById(R.id.inject_track);
+                final View thumb = card.findViewById(R.id.inject_thumb);
+                final int idx = i;
+                card.findViewById(R.id.inject_switch).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        injectOn[idx] = !injectOn[idx];
+                        updateSwitch(track, thumb, injectOn[idx], 44);
+                        if (idx == 0) {
+                            if (injectOn[idx]) injectPakFile();
+                            else removePakFile();
+                        } else {
+                            showMsg(injectNames[idx] + (injectOn[idx] ? " 已开启" : " 已关闭"));
+                        }
+                    }
+                });
+            }
+    private boolean[] injectOn = new boolean[6];
 
     // 路径常量
     private static final String SRC_DIR = "/storage/emulated/0/和平PAK文件/内透[红]";
@@ -126,18 +154,36 @@ public class FloatingService extends Service {
         final View pageSafe = floatView.findViewById(R.id.page_safe);
         final View pageSettings = floatView.findViewById(R.id.page_settings);
 
-        // 内透[红] 开关
-        final View swTestTrack = floatView.findViewById(R.id.sw_test_track);
-        final View swTestThumb = floatView.findViewById(R.id.sw_test_thumb);
-        floatView.findViewById(R.id.sw_test).setOnClickListener(new View.OnClickListener() {
+            // 初始化 6 个注入卡片
+            int[] injectIds = {R.id.inject1, R.id.inject2, R.id.inject3, R.id.inject4, R.id.inject5, R.id.inject6};
+            int[] injectBgs = {R.drawable.bg_inject_green, R.drawable.bg_inject_purple, R.drawable.bg_inject_blue, R.drawable.bg_inject_orange, R.drawable.bg_inject_red, R.drawable.bg_inject_cyan};
+            int[] injectIcons = {R.drawable.ic_inject_rocket, R.drawable.ic_inject_shield, R.drawable.ic_inject_target, R.drawable.ic_inject_gamepad, R.drawable.ic_inject_bell, R.drawable.ic_inject_lock};
+            for (int i = 0; i < 6; i++) {
+                View card = floatView.findViewById(injectIds[i]);
+                card.setBackgroundResource(injectBgs[i]);
+                TextView name = card.findViewById(R.id.inject_name);
+                ImageView icon = card.findViewById(R.id.inject_icon);
+                name.setText(injectNames[i]);
+                icon.setImageResource(injectIcons[i]);
+                final View track = card.findViewById(R.id.inject_track);
+                final View thumb = card.findViewById(R.id.inject_thumb);
+                final int idx = i;
+                card.findViewById(R.id.inject_switch).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        injectOn[idx] = !injectOn[idx];
+                        updateSwitch(track, thumb, injectOn[idx], 44);
+                        if (idx == 0) {
+                            if (injectOn[idx]) injectPakFile();
+                            else removePakFile();
+                        } else {
+                            showMsg(injectNames[idx] + (injectOn[idx] ? " 已开启" : " 已关闭"));
+                        }
+                    }
+                });
+            }
             @Override
             public void onClick(View v) {
-                injectRedOn = !injectRedOn;
-                updateSwitch(swTestTrack, swTestThumb, injectRedOn, 44);
-                if (injectRedOn) {
-                    injectPakFile();
-                } else {
-                    removePakFile();
                 }
             }
         });
