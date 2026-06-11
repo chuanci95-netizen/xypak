@@ -83,7 +83,7 @@ public class PermissionFragment extends Fragment {
             }
         });
 
-        v.findViewById(R.id.card_install_shizuku).setOnClickListener(view -> {
+        v.findViewById(R.id.card_install).setOnClickListener(view -> {
             installShizuku();
         });
 
