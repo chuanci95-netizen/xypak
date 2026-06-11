@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -101,9 +100,10 @@ public class PermissionFragment extends Fragment {
     }
 
     private void updateUI() {
-        setCheck(checkRoot, rootGranted);
-        setCheck(checkShizuku, shizukuGranted);
-        setCheck(checkInstall, shizukuInstalled);
+        // 用 visibility 控制勾选（布局里是 TextView 不是 ImageView）
+        checkRoot.setVisibility(rootGranted ? View.VISIBLE : View.INVISIBLE);
+        checkShizuku.setVisibility(shizukuGranted ? View.VISIBLE : View.INVISIBLE);
+        checkInstall.setVisibility(shizukuInstalled ? View.VISIBLE : View.INVISIBLE);
 
         if (rootGranted) {
             progressText.setText("已选择 Root 模式");
@@ -114,12 +114,6 @@ public class PermissionFragment extends Fragment {
         } else {
             progressText.setText("请选择模式");
             progressBar.setProgress(0);
-        }
-    }
-
-    private void setCheck(View v, boolean checked) {
-        if (v instanceof ImageView) {
-            ((ImageView) v).setImageResource(checked ? R.drawable.ic_check_on : R.drawable.ic_check_off);
         }
     }
 
