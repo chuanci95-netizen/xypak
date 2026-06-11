@@ -336,11 +336,11 @@ public class FloatingService extends Service {
 
     private void playBeep() {
         try {
-            final ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_SYSTEM, 100);
-            tg.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+            ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 90);
+            tg.startTone(ToneGenerator.TONE_PROP_BEEP, 150);
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override public void run() { try { tg.release(); } catch (Exception e) {} }
-            }, 500);
+            }, 300);
         } catch (Exception e) {}
     }
 
