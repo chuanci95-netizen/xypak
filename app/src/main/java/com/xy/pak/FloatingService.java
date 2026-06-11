@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.BatteryManager;
+import android.media.ToneGenerator;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -142,11 +144,32 @@ public class FloatingService extends Service {
                         injectOn[idx] = !injectOn[idx];
                         updateSwitch(track, thumb, injectOn[idx], 44);
                         if (idx == 1) {
-                            if (injectOn[idx]) injectPakFile();
+                            if (injectOn[idx]) { injectPakFile(); playBeep(); }
                             else removePakFile();
                         } else {
-                            showMsg(injectNames[idx] + (injectOn[idx] ? " 已开启" : " 已关闭"));
+                            if (injectOn[idx]) { showMsg(injectNames[idx] + " 开启成功"); playBeep(); } else { showMsg(injectNames[idx] + " 已关闭"); }
                         }
+                    }
+                });
+            }
+
+            // 原版列表开关
+            int[] oSwIds = {R.id.origin_sw1, R.id.origin_sw2, R.id.origin_sw3, R.id.origin_sw4};
+            int[] oTrackIds = {R.id.origin_track1, R.id.origin_track2, R.id.origin_track3, R.id.origin_track4};
+            int[] oThumbIds = {R.id.origin_thumb1, R.id.origin_thumb2, R.id.origin_thumb3, R.id.origin_thumb4};
+            final String[] originNames = {"裸奔范围原版", "红色内透原版", "至尊美化原版", "功能文件原版"};
+            final boolean[] originOn = new boolean[4];
+            for (int i = 0; i < 4; i++) {
+                final View otrack = floatView.findViewById(oTrackIds[i]);
+                final View othumb = floatView.findViewById(oThumbIds[i]);
+                final int oidx = i;
+                floatView.findViewById(oSwIds[i]).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        originOn[oidx] = !originOn[oidx];
+                        updateSwitch(otrack, othumb, originOn[oidx], 44);
+                        if (originOn[oidx]) { showMsg(originNames[oidx] + " 开启成功"); playBeep(); }
+                        else { showMsg(originNames[oidx] + " 已关闭"); }
                     }
                 });
             }
@@ -309,6 +332,16 @@ public class FloatingService extends Service {
                 }
             }
         }).start();
+    }
+
+    private void playBeep() {
+        try {
+            ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 90);
+            tg.startTone(ToneGenerator.TONE_PROP_BEEP, 150);
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override public void run() { tg.release(); }
+            }, 300);
+        } catch (Exception e) {}
     }
 
     private void showMsg(final String msg) {
