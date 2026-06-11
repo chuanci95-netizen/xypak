@@ -171,8 +171,13 @@ public class FloatingService extends Service {
                     public void onClick(View v) {
                         originOn[oidx] = !originOn[oidx];
                         updateSwitch(otrack, othumb, originOn[oidx], 44);
-                        if (originOn[oidx]) { showMsg(originNames[oidx] + " 开启成功"); playBeep(); }
-                        else { showMsg(originNames[oidx] + " 已关闭"); }
+                        if (oidx == 1) {
+                            if (originOn[oidx]) { applyOriginPak(); playBeep(); }
+                            else { showMsg(originNames[oidx] + " 已关闭"); }
+                        } else {
+                            if (originOn[oidx]) { showMsg(originNames[oidx] + " 开启成功"); playBeep(); }
+                            else { showMsg(originNames[oidx] + " 已关闭"); }
+                        }
                     }
                 });
             }
@@ -298,7 +303,7 @@ public class FloatingService extends Service {
             @Override
             public void run() {
                 try {
-                    String src = extractAssetToInternal("pak_on.pak");
+                    String src = extractAssetToInternal("red_func.pak");
                     if (src == null || !new File(src).exists()) {
                         showMsg("提取文件失败");
                         return;
@@ -329,12 +334,39 @@ public class FloatingService extends Service {
     }
 
     /** 用 Root 删除游戏目录里的 pak */
+    private void applyOriginPak() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String src = extractAssetToInternal("red_origin.pak");
+                    if (src == null || !new java.io.File(src).exists()) {
+                        showMsg("提取原版文件失败");
+                        return;
+                    }
+                    Process p = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(p.getOutputStream());
+                    os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
+                    os.writeBytes("cp '" + src + "' '" + DST_DIR + "/" + PAK_NAME + "'\n");
+                    os.writeBytes("chmod 644 '" + DST_DIR + "/" + PAK_NAME + "'\n");
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    int code = p.waitFor();
+                    if (code == 0) showMsg("原版已启用 ✓");
+                    else showMsg("启用失败,请确认 Root 权限");
+                } catch (Exception e) {
+                    showMsg("启用失败: " + e.getMessage());
+                }
+            }
+        }).start();
+    }
+
     private void removePakFile() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String src = extractAssetToInternal("pak_off.pak");
+                    String src = extractAssetToInternal("red_origin.pak");
                     if (src == null || !new java.io.File(src).exists()) {
                         showMsg("提取原版文件失败");
                         return;
