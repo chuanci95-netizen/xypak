@@ -92,7 +92,7 @@
                             android:id="@+id/text_buy"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_pill_purple"
+                            android:background="@drawable/bg_pill_light"
                             android:clickable="true"
                             android:focusable="true"
                             android:gravity="center"
@@ -100,7 +100,7 @@
                             android:paddingBottom="10dp"
                             android:paddingLeft="14dp"
                             android:paddingRight="14dp"
-                            android:text="✦ 购买小月内部 ✦"
+                            android:text="购买小月内部"
                             android:textColor="#FFFFFF"
                             android:textSize="14sp"
                             android:textStyle="bold"/>

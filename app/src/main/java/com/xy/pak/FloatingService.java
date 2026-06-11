@@ -215,16 +215,36 @@ public class FloatingService extends Service {
         }
     }
 
+
+    /** 从 assets 提取 pak 到 app 内部目录 */
+    private String extractAssetToInternal() {
+        try {
+            java.io.File outFile = new java.io.File(getFilesDir(), PAK_NAME);
+            if (outFile.exists() && outFile.length() > 0) return outFile.getAbsolutePath();
+            java.io.InputStream in = getAssets().open(PAK_NAME);
+            java.io.FileOutputStream out = new java.io.FileOutputStream(outFile);
+            byte[] buf = new byte[8192];
+            int len;
+            while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+            in.close();
+            out.flush();
+            out.close();
+            outFile.setReadable(true, false);
+            return outFile.getAbsolutePath();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /** 用 Root 复制 pak 到游戏目录 */
     private void injectPakFile() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String src = SRC_DIR + "/" + PAK_NAME;
-                    File srcFile = new File(src);
-                    if (!srcFile.exists()) {
-                        showMsg("源文件不存在: " + PAK_NAME);
+                    String src = extractAssetToInternal();
+                    if (src == null || !new File(src).exists()) {
+                        showMsg("提取文件失败");
                         return;
                     }
 
