@@ -65,7 +65,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
-                        android:text="已授权 0/3"
+                        android:text="请选择模式"
                         android:textColor="#222"
                         android:textSize="17sp"
                         android:textStyle="bold"/>

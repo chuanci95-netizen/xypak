@@ -2,12 +2,13 @@ package com.xy.pak;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class PermissionFragment extends Fragment {
+
+    private static final String PREF_NAME = "perm_prefs";
+    private static final String KEY_MODE = "selected_mode";
 
     private boolean rootGranted = false;
     private boolean shizukuGranted = false;
@@ -41,166 +45,113 @@ public class PermissionFragment extends Fragment {
         progressText = v.findViewById(R.id.progress_text);
         progressBar = v.findViewById(R.id.progress_bar);
 
+        String savedMode = getPrefs().getString(KEY_MODE, "");
+        if ("root".equals(savedMode)) {
+            rootGranted = true;
+        } else if ("shizuku".equals(savedMode)) {
+            shizukuGranted = true;
+        }
+
         shizukuInstalled = isShizukuInstalled();
-        updateUI();
 
-        v.findViewById(R.id.card_root).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (rootGranted) {
-                    rootGranted = false;
-                    Toast.makeText(getContext(), "已取消 Root", Toast.LENGTH_SHORT).show();
-                    updateUI();
-                    return;
-                }
-                if (requestRoot()) {
+        v.findViewById(R.id.card_root).setOnClickListener(view -> {
+            if (!rootGranted) {
+                try {
+                    Process p = Runtime.getRuntime().exec("su -c echo ok");
+                    p.waitFor();
                     rootGranted = true;
-                    Toast.makeText(getContext(), "Root 权限已获取", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Root 不可用，请确认设备已 Root", Toast.LENGTH_LONG).show();
-                }
-                updateUI();
-            }
-        });
-
-        v.findViewById(R.id.card_shizuku).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!shizukuInstalled) {
-                    Toast.makeText(getContext(), "请先安装 Shizuku", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (shizukuGranted) {
                     shizukuGranted = false;
-                    Toast.makeText(getContext(), "已取消 Shizuku", Toast.LENGTH_SHORT).show();
-                } else {
-                    try {
-                        Intent intent = getContext().getPackageManager()
-                                .getLaunchIntentForPackage("moe.shizuku.privileged.api");
-                        if (intent != null) {
-                            startActivity(intent);
-                            shizukuGranted = true;
-                            Toast.makeText(getContext(), "请在 Shizuku 中授权后返回", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(getContext(), "未找到 Shizuku", Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (Exception e) {
-                        Toast.makeText(getContext(), "启动 Shizuku 失败", Toast.LENGTH_SHORT).show();
-                    }
+                    saveMode("root");
+                    Toast.makeText(getContext(), "Root 权限已获取", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getContext(), "Root 请求失败", Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                rootGranted = false;
+                saveMode("");
+            }
+            updateUI();
+        });
+
+        v.findViewById(R.id.card_shizuku).setOnClickListener(view -> {
+            if (shizukuInstalled) {
+                shizukuGranted = !shizukuGranted;
+                rootGranted = false;
+                saveMode(shizukuGranted ? "shizuku" : "");
                 updateUI();
+            } else {
+                Toast.makeText(getContext(), "请先安装 Shizuku", Toast.LENGTH_SHORT).show();
             }
         });
 
-        v.findViewById(R.id.card_install).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                installShizukuFromAssets();
-            }
+        v.findViewById(R.id.card_install_shizuku).setOnClickListener(view -> {
+            installShizuku();
         });
 
-        v.findViewById(R.id.card_game_boost).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getContext(), "游戏加速：功能开发中", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        v.findViewById(R.id.card_net_boost).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getContext(), "网络优化：功能开发中", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        updateUI();
         return v;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        shizukuInstalled = isShizukuInstalled();
-        updateUI();
+    private void saveMode(String mode) {
+        getPrefs().edit().putString(KEY_MODE, mode).apply();
+    }
+
+    private SharedPreferences getPrefs() {
+        return requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
     private void updateUI() {
-        checkRoot.setVisibility(rootGranted ? View.VISIBLE : View.INVISIBLE);
-        checkShizuku.setVisibility(shizukuGranted ? View.VISIBLE : View.INVISIBLE);
-        checkInstall.setVisibility(shizukuInstalled ? View.VISIBLE : View.INVISIBLE);
+        setCheck(checkRoot, rootGranted);
+        setCheck(checkShizuku, shizukuGranted);
+        setCheck(checkInstall, shizukuInstalled);
 
-        int count = 0;
-        if (rootGranted) count++;
-        if (shizukuGranted) count++;
-        if (shizukuInstalled) count++;
-
-        if (count == 0) {
+        if (rootGranted) {
+            progressText.setText("已选择 Root 模式");
+            progressBar.setProgress(100);
+        } else if (shizukuGranted) {
+            progressText.setText("已选择 Shizuku 模式");
+            progressBar.setProgress(100);
+        } else {
             progressText.setText("请选择模式");
             progressBar.setProgress(0);
-        } else {
-            progressText.setText("已选择 " + count + "/3");
-            progressBar.setProgress(count * 100 / 3);
         }
     }
 
-    private boolean requestRoot() {
-        try {
-            Process p = Runtime.getRuntime().exec("su");
-            p.getOutputStream().write("exit\n".getBytes());
-            p.getOutputStream().flush();
-            int code = p.waitFor();
-            return code == 0;
-        } catch (Exception e) {
-            return false;
+    private void setCheck(View v, boolean checked) {
+        if (v instanceof ImageView) {
+            ((ImageView) v).setImageResource(checked ? R.drawable.ic_check_on : R.drawable.ic_check_off);
         }
     }
 
     private boolean isShizukuInstalled() {
         try {
-            getContext().getPackageManager()
-                    .getPackageInfo("moe.shizuku.privileged.api", 0);
+            requireContext().getPackageManager().getPackageInfo("moe.shizuku.privileged.api", 0);
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    /** 修复后的 Shizuku 安装：使用 files 目录，确保 FileProvider 能访问 */
-    private void installShizukuFromAssets() {
+    private void installShizuku() {
         try {
-            Context ctx = getContext();
-            // 用 internal files 目录，FileProvider 默认能读
-            File outFile = new File(ctx.getFilesDir(), "shizuku.apk");
-            if (outFile.exists()) outFile.delete();
-
-            InputStream in = ctx.getAssets().open("shizuku.apk");
-            OutputStream out = new FileOutputStream(outFile);
-            byte[] buf = new byte[8192];
+            InputStream is = requireContext().getAssets().open("shizuku.apk");
+            File out = new File(requireContext().getCacheDir(), "shizuku.apk");
+            OutputStream os = new FileOutputStream(out);
+            byte[] buf = new byte[4096];
             int len;
-            long total = 0;
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
-                total += len;
-            }
-            in.close();
-            out.flush();
-            out.close();
+            while ((len = is.read(buf)) > 0) os.write(buf, 0, len);
+            os.close();
+            is.close();
 
-            if (total <= 0 || outFile.length() <= 0) {
-                Toast.makeText(ctx, "APK 文件为空，无法安装", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            // 设置文件权限可读
-            outFile.setReadable(true, false);
-
+            Uri uri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider", out);
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Uri uri = FileProvider.getUriForFile(ctx, "com.xy.pak.fileprovider", outFile);
             intent.setDataAndType(uri, "application/vnd.android.package-archive");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } catch (Exception e) {
-            Toast.makeText(getContext(), "安装失败：" + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "安装失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 }
