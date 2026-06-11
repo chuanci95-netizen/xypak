@@ -37,7 +37,7 @@ public class FloatingService extends Service {
     private boolean expanded = false;
 
     private boolean[] tileOn = new boolean[6];
-    private final String[] tileNames = {"悬浮窗", "游戏模式", "清理后台", "开启最高帧率", "免打扰", "状态栏"};
+    private final String[] tileNames = {"悬浮窗", "游戏模式", "清理后台", "最高帧率", "免打扰", "状态栏"};
     private final int[] tileIcons = {
             R.drawable.ic_rocket, R.drawable.ic_bolt, R.drawable.ic_refresh,
             R.drawable.ic_wrench, R.drawable.ic_bell, R.drawable.ic_lock_status
@@ -393,6 +393,50 @@ public class FloatingService extends Service {
         }
     }
 
+    private void clearBackground() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int count = 0;
+                StringBuilder cmd = new StringBuilder();
+                try {
+                    android.content.pm.PackageManager pm = getPackageManager();
+                    java.util.List<android.content.pm.ApplicationInfo> apps =
+                        pm.getInstalledApplications(0);
+                    for (android.content.pm.ApplicationInfo ai : apps) {
+                        // 排除系统应用
+                        if ((ai.flags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) continue;
+                        // 排除自己
+                        if (ai.packageName.equals(getPackageName())) continue;
+                        cmd.append("am force-stop ").append(ai.packageName).append(";");
+                        count++;
+                    }
+                } catch (Throwable e) {}
+                cmd.append("am kill-all;");
+                cmd.append("echo 3 > /proc/sys/vm/drop_caches;");
+                final String res = CmdExec.run(cmd.toString());
+                final int fcount = count;
+                if (floatView != null) {
+                    floatView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if ("NO_PERMISSION".equals(res)) {
+                                showMsg("需要 Root 或 Shizuku 授权");
+                            } else {
+                                showMsg("已清理 " + fcount + " 个后台应用");
+                                playBeep();
+                            }
+                            updateSwitch(
+                                (View) floatView.findViewById(R.id.tile3).findViewById(R.id.tile_track),
+                                (View) floatView.findViewById(R.id.tile3).findViewById(R.id.tile_thumb),
+                                false, 40);
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
     private void applyTile(int idx, boolean on) {
         final String cmd;
         final String okMsg;
@@ -404,11 +448,10 @@ public class FloatingService extends Service {
                          : "settings put system game_mode 0";
                 okMsg = on ? "游戏模式 已开启" : "游戏模式 已关闭";
                 break;
-            case 2: // 清理后台 - 点一下执行,不保持状态
-                cmd = "am kill-all";
-                okMsg = "后台已清理";
+            case 2: // 清理后台 - 强力清理所有第三方后台应用
                 tileOn[2] = false;
-                break;
+                clearBackground();
+                return;
             case 3: // 最高帧率 - 读取系统支持的最高刷新率
                 if (on) {
                     int maxHz = getMaxRefreshRate();
