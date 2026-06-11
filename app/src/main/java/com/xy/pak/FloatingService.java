@@ -19,6 +19,8 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.io.DataOutputStream;
+import java.io.File;
 
 public class FloatingService extends Service {
 
@@ -40,7 +42,13 @@ public class FloatingService extends Service {
             R.drawable.bg_icon_tile_purple, R.drawable.bg_icon_tile_red, R.drawable.bg_icon_tile_gray
     };
 
-    private boolean testOn = false;
+    // 内透[红] 开关状态
+    private boolean injectRedOn = false;
+
+    // 路径常量
+    private static final String SRC_DIR = "/storage/emulated/0/和平PAK文件/内透[红]";
+    private static final String DST_DIR = "/storage/emulated/0/Android/data/com.tencent.tmgp.pubgmhd/files/UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Saved/Paks";
+    private static final String PAK_NAME = "game_patch_1_36_11_15380.pak";
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
@@ -64,7 +72,6 @@ public class FloatingService extends Service {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // 横竖屏切换后，延迟一点再重新定位（等系统真正完成切换）
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -77,15 +84,9 @@ public class FloatingService extends Service {
         return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
     }
 
-    /** 强制将悬浮窗居中放到屏幕顶部 */
     private void centerOnScreen() {
         if (lp == null || wm == null || floatView == null) return;
         try {
-            // 用 Display 实时拿到屏幕宽度（最准确）
-            DisplayMetrics dm = new DisplayMetrics();
-            Display display = wm.getDefaultDisplay();
-            display.getRealMetrics(dm);
-
             lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
             lp.x = 0;
             lp.y = dp(32);
@@ -125,16 +126,23 @@ public class FloatingService extends Service {
         final View pageSafe = floatView.findViewById(R.id.page_safe);
         final View pageSettings = floatView.findViewById(R.id.page_settings);
 
+        // 内透[红] 开关
         final View swTestTrack = floatView.findViewById(R.id.sw_test_track);
         final View swTestThumb = floatView.findViewById(R.id.sw_test_thumb);
         floatView.findViewById(R.id.sw_test).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                testOn = !testOn;
-                updateSwitch(swTestTrack, swTestThumb, testOn, 44);
+                injectRedOn = !injectRedOn;
+                updateSwitch(swTestTrack, swTestThumb, injectRedOn, 44);
+                if (injectRedOn) {
+                    injectPakFile();
+                } else {
+                    removePakFile();
+                }
             }
         });
 
+        // 6 个磁贴
         int[] tileIds = {R.id.tile1, R.id.tile2, R.id.tile3, R.id.tile4, R.id.tile5, R.id.tile6};
         for (int i = 0; i < 6; i++) {
             final int idx = i;
@@ -172,7 +180,6 @@ public class FloatingService extends Service {
                     int level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
                     batteryText.setText(level + "%");
                 } catch (Exception e) {}
-                // 展开后重新居中
                 centerOnScreen();
             }
         });
@@ -206,6 +213,77 @@ public class FloatingService extends Service {
             Toast.makeText(this, "悬浮窗启动失败", Toast.LENGTH_SHORT).show();
             stopSelf();
         }
+    }
+
+    /** 用 Root 复制 pak 到游戏目录 */
+    private void injectPakFile() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String src = SRC_DIR + "/" + PAK_NAME;
+                    File srcFile = new File(src);
+                    if (!srcFile.exists()) {
+                        showMsg("源文件不存在: " + PAK_NAME);
+                        return;
+                    }
+
+                    Process p = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(p.getOutputStream());
+                    // 确保目标目录存在
+                    os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
+                    // 复制文件
+                    os.writeBytes("cp '" + src + "' '" + DST_DIR + "/" + PAK_NAME + "'\n");
+                    // 设置权限
+                    os.writeBytes("chmod 644 '" + DST_DIR + "/" + PAK_NAME + "'\n");
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    int code = p.waitFor();
+
+                    if (code == 0) {
+                        showMsg("内透[红] 已注入 ✓");
+                    } else {
+                        showMsg("注入失败，请确认 Root 权限");
+                    }
+                } catch (Exception e) {
+                    showMsg("注入失败: " + e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    /** 用 Root 删除游戏目录里的 pak */
+    private void removePakFile() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Process p = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(p.getOutputStream());
+                    os.writeBytes("rm -f '" + DST_DIR + "/" + PAK_NAME + "'\n");
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    int code = p.waitFor();
+
+                    if (code == 0) {
+                        showMsg("内透[红] 已关闭 ✓");
+                    } else {
+                        showMsg("关闭失败，请确认 Root 权限");
+                    }
+                } catch (Exception e) {
+                    showMsg("关闭失败: " + e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    private void showMsg(final String msg) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(FloatingService.this, msg, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateSwitch(View track, View thumb, boolean on, int trackWidthDp) {
