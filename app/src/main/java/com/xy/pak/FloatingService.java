@@ -43,7 +43,7 @@ public class FloatingService extends Service {
     };
 
     // 内透[红] 开关状态
-    private boolean injectRedOn = false;
+    private boolean[] injectOn = new boolean[4];
 
     // 路径常量
     private static final String SRC_DIR = "/storage/emulated/0/和平PAK文件/内透[红]";
@@ -127,22 +127,28 @@ public class FloatingService extends Service {
         final View pageSettings = floatView.findViewById(R.id.page_settings);
 
         // 内透[红] 开关
-        final View swTestTrack = floatView.findViewById(R.id.sw_test_track);
-        final View swTestThumb = floatView.findViewById(R.id.sw_test_thumb);
-        floatView.findViewById(R.id.sw_test).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                injectRedOn = !injectRedOn;
-                updateSwitch(swTestTrack, swTestThumb, injectRedOn, 44);
-                if (injectRedOn) {
-                    injectPakFile();
-                } else {
-                    removePakFile();
-                }
+            int[] swIds = {R.id.inject_sw1, R.id.inject_sw2, R.id.inject_sw3, R.id.inject_sw4};
+            int[] trackIds = {R.id.inject_track1, R.id.inject_track2, R.id.inject_track3, R.id.inject_track4};
+            int[] thumbIds = {R.id.inject_thumb1, R.id.inject_thumb2, R.id.inject_thumb3, R.id.inject_thumb4};
+            final String[] injectNames = {"裸奔范围", "红色内透", "至尊美化", "功能文件"};
+            for (int i = 0; i < 4; i++) {
+                final View track = floatView.findViewById(trackIds[i]);
+                final View thumb = floatView.findViewById(thumbIds[i]);
+                final int idx = i;
+                floatView.findViewById(swIds[i]).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        injectOn[idx] = !injectOn[idx];
+                        updateSwitch(track, thumb, injectOn[idx], 44);
+                        if (idx == 1) {
+                            if (injectOn[idx]) injectPakFile();
+                            else removePakFile();
+                        } else {
+                            showMsg(injectNames[idx] + (injectOn[idx] ? " 已开启" : " 已关闭"));
+                        }
+                    }
+                });
             }
-        });
-
-        // 6 个磁贴
         int[] tileIds = {R.id.tile1, R.id.tile2, R.id.tile3, R.id.tile4, R.id.tile5, R.id.tile6};
         for (int i = 0; i < 6; i++) {
             final int idx = i;
