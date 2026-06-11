@@ -149,6 +149,12 @@ public class FloatingService extends Service {
                         if (idx == 1) {
                             if (injectOn[idx]) { injectPakFile(); playBeep(); }
                             else removePakFile();
+                        } else if (idx == 0) {
+                            if (injectOn[idx]) { injectNakedPak(); playBeep(); }
+                            else removeNakedPak();
+                        } else if (idx == 2) {
+                            if (injectOn[idx]) { injectBeautyPak(); playBeep(); }
+                            else removeBeautyPak();
                         } else {
                             if (injectOn[idx]) { showMsg(injectNames[idx] + " 开启成功"); playBeep(); } else { showMsg(injectNames[idx] + " 已关闭"); }
                         }
@@ -174,6 +180,12 @@ public class FloatingService extends Service {
                         if (oidx == 1) {
                             if (originOn[oidx]) { applyOriginPak(); playBeep(); }
                             else { showMsg(originNames[oidx] + " 已关闭"); }
+                        } else if (oidx == 0) {
+                            if (originOn[oidx]) { applyNakedOriginPak(); playBeep(); }
+                            else { showMsg(originNames[oidx] + " 已关闭"); }
+                        } else if (oidx == 2) {
+                            if (originOn[oidx]) { applyBeautyOriginPak(); playBeep(); }
+                            else { showMsg(originNames[oidx] + " 已关闭"); }
                         } else {
                             if (originOn[oidx]) { showMsg(originNames[oidx] + " 开启成功"); playBeep(); }
                             else { showMsg(originNames[oidx] + " 已关闭"); }
@@ -197,8 +209,16 @@ public class FloatingService extends Service {
                     public void onClick(View v) {
                         safeOn[sidx] = !safeOn[sidx];
                         updateSwitch(strack, sthumb, safeOn[sidx], 44);
-                        if (safeOn[sidx]) { showMsg(safeNames[sidx] + " 开启成功"); playBeep(); }
-                        else { showMsg(safeNames[sidx] + " 已关闭"); }
+                        if (sidx == 1) {
+                            if (safeOn[sidx]) { AntiFreeze.start(FloatingService.this); playBeep(); }
+                            else { AntiFreeze.stop(); }
+                        } else if (sidx == 2) {
+                            if (safeOn[sidx]) { AntiFreeze.stop(); showMsg("下线关闭防封 已执行"); playBeep(); }
+                            else { showMsg(safeNames[sidx] + " 已关闭"); }
+                        } else {
+                            if (safeOn[sidx]) { showMsg(safeNames[sidx] + " 开启成功"); playBeep(); }
+                            else { showMsg(safeNames[sidx] + " 已关闭"); }
+                        }
                     }
                 });
             }
@@ -334,6 +354,78 @@ public class FloatingService extends Service {
     }
 
     /** 用 Root 删除游戏目录里的 pak */
+    private static final String LOBBY_NAME = "map_lobby_1.36.11.15210.pak";
+
+    private void injectNakedPak() { copyPakToGame("naked_func.pak", LOBBY_NAME, "裸奔已开启 ✓", "开启失败"); }
+    private void removeNakedPak() { copyPakToGame("naked_origin.pak", LOBBY_NAME, "裸奔已关闭 ✓", "关闭失败"); }
+    private void applyNakedOriginPak() { copyPakToGame("naked_origin.pak", LOBBY_NAME, "原版已启用 ✓", "启用失败"); }
+
+    private void injectBeautyPak() {
+        copyMultiPakToGame(
+            new String[]{"beauty_func_1.pak", "beauty_func_2.pak", "beauty_func_3.pak"},
+            new String[]{"game_patch_1.36.11.15382.pak", "game_patch_1.36.11.15380.pak", "game_patch_1.36.11.15360.pak"},
+            "美化已开启 ✓", "开启失败");
+    }
+    private void removeBeautyPak() {
+        copyMultiPakToGame(
+            new String[]{"beauty_origin_1.pak", "beauty_origin_2.pak", "beauty_origin_3.pak"},
+            new String[]{"game_patch_1.36.11.15382.pak", "game_patch_1.36.11.15380.pak", "game_patch_1.36.11.15360.pak"},
+            "美化已关闭 ✓", "关闭失败");
+    }
+    private void applyBeautyOriginPak() {
+        copyMultiPakToGame(
+            new String[]{"beauty_origin_1.pak", "beauty_origin_2.pak", "beauty_origin_3.pak"},
+            new String[]{"game_patch_1.36.11.15382.pak", "game_patch_1.36.11.15380.pak", "game_patch_1.36.11.15360.pak"},
+            "原版已启用 ✓", "启用失败");
+    }
+
+    private void copyPakToGame(final String assetName, final String targetName, final String okMsg, final String failMsg) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String src = extractAssetToInternal(assetName);
+                    if (src == null || !new java.io.File(src).exists()) { showMsg("提取文件失败: " + assetName); return; }
+                    Process p = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(p.getOutputStream());
+                    os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
+                    os.writeBytes("cp '" + src + "' '" + DST_DIR + "/" + targetName + "'\n");
+                    os.writeBytes("chmod 644 '" + DST_DIR + "/" + targetName + "'\n");
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    int code = p.waitFor();
+                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认 Root 权限");
+                } catch (Exception e) { showMsg(failMsg + ": " + e.getMessage()); }
+            }
+        }).start();
+    }
+
+    private void copyMultiPakToGame(final String[] assetNames, final String[] targetNames, final String okMsg, final String failMsg) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String[] srcPaths = new String[assetNames.length];
+                    for (int i = 0; i < assetNames.length; i++) {
+                        srcPaths[i] = extractAssetToInternal(assetNames[i]);
+                        if (srcPaths[i] == null || !new java.io.File(srcPaths[i]).exists()) { showMsg("提取文件失败: " + assetNames[i]); return; }
+                    }
+                    Process p = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(p.getOutputStream());
+                    os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
+                    for (int i = 0; i < srcPaths.length; i++) {
+                        os.writeBytes("cp '" + srcPaths[i] + "' '" + DST_DIR + "/" + targetNames[i] + "'\n");
+                        os.writeBytes("chmod 644 '" + DST_DIR + "/" + targetNames[i] + "'\n");
+                    }
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    int code = p.waitFor();
+                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认 Root 权限");
+                } catch (Exception e) { showMsg(failMsg + ": " + e.getMessage()); }
+            }
+        }).start();
+    }
+
     private void applyOriginPak() {
         new Thread(new Runnable() {
             @Override
