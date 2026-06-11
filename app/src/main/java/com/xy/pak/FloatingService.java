@@ -119,9 +119,9 @@ public class FloatingService extends Service {
         final ImageView closeBtn = floatView.findViewById(R.id.float_close);
         final TextView batteryText = floatView.findViewById(R.id.float_battery);
 
-        final TextView tabList = floatView.findViewById(R.id.tab_list);
-        final TextView tabSafe = floatView.findViewById(R.id.tab_safe);
-        final TextView tabSettings = floatView.findViewById(R.id.tab_settings);
+        final View tabList = floatView.findViewById(R.id.tab_list);
+        final View tabSafe = floatView.findViewById(R.id.tab_safe);
+        final View tabSettings = floatView.findViewById(R.id.tab_settings);
         final View pageList = floatView.findViewById(R.id.page_list);
         final View pageSafe = floatView.findViewById(R.id.page_safe);
         final View pageSettings = floatView.findViewById(R.id.page_settings);
