@@ -397,21 +397,34 @@ public class FloatingService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                int count = 0;
-                StringBuilder cmd = new StringBuilder();
-                try {
-                    android.content.pm.PackageManager pm = getPackageManager();
-                    java.util.List<android.content.pm.ApplicationInfo> apps =
-                        pm.getInstalledApplications(0);
-                    for (android.content.pm.ApplicationInfo ai : apps) {
-                        // 排除系统应用
-                        if ((ai.flags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) continue;
-                        // 排除自己
-                        if (ai.packageName.equals(getPackageName())) continue;
-                        cmd.append("am force-stop ").append(ai.packageName).append(";");
-                        count++;
+                // 第一步:用 shell 抓所有正在运行的第三方进程包名(绕过包可见性限制)
+                String myPkg = getPackageName();
+                String listOut = CmdExec.run(
+                    "ps -A -o NAME | grep -E '\\.' | sort -u");
+                java.util.HashSet<String> pkgs = new java.util.HashSet<String>();
+                if (listOut != null && !listOut.startsWith("ERR") && !"NO_PERMISSION".equals(listOut)) {
+                    for (String line : listOut.split("\n")) {
+                        String name = line.trim();
+                        // 取进程名主包名部分(去掉 :xxx 子进程后缀)
+                        int colon = name.indexOf(':');
+                        if (colon > 0) name = name.substring(0, colon);
+                        if (name.length() < 3 || !name.contains(".")) continue;
+                        // 排除自己和关键系统进程
+                        if (name.equals(myPkg)) continue;
+                        if (name.startsWith("android")) continue;
+                        if (name.startsWith("com.android.systemui")) continue;
+                        if (name.startsWith("com.android.launcher")) continue;
+                        if (name.startsWith("com.miui.home")) continue;
+                        if (name.startsWith("/")) continue;
+                        pkgs.add(name);
                     }
-                } catch (Throwable e) {}
+                }
+                int count = pkgs.size();
+                StringBuilder cmd = new StringBuilder();
+                for (String pkg : pkgs) {
+                    cmd.append("am force-stop ").append(pkg).append(";");
+                    cmd.append("am kill ").append(pkg).append(";");
+                }
                 cmd.append("am kill-all;");
                 cmd.append("echo 3 > /proc/sys/vm/drop_caches;");
                 final String res = CmdExec.run(cmd.toString());
