@@ -197,7 +197,7 @@ public class PermissionFragment extends Fragment {
         PackageManager pm = getContext().getPackageManager();
         for (String pkg : SHIZUKU_PKGS) {
             try {
-                pm.getPackageInfo(pkg, 0);
+                pm.getPackageInfo(pkg, PackageManager.GET_ACTIVITIES);
                 return true;
             } catch (Exception ignored) {}
         }
