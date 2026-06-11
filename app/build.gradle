@@ -3,6 +3,9 @@ apply plugin: 'com.android.application'
 android {
     namespace 'com.xy.pak'
     compileSdk 34
+    aaptOptions {
+        noCompress "pak"
+    }
     defaultConfig {
         applicationId "com.xy.pak"
         minSdk 21
