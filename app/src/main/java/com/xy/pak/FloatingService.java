@@ -356,9 +356,55 @@ public class FloatingService extends Service {
     /** 用 Root 删除游戏目录里的 pak */
     private static final String LOBBY_NAME = "map_lobby_1.36.11.15210.pak";
 
-    private void injectNakedPak() { copyPakToGame("naked_func.pak", LOBBY_NAME, "裸奔已开启 ✓", "开启失败"); }
-    private void removeNakedPak() { copyPakToGame("naked_origin.pak", LOBBY_NAME, "裸奔已关闭 ✓", "关闭失败"); }
-    private void applyNakedOriginPak() { copyPakToGame("naked_origin.pak", LOBBY_NAME, "原版已启用 ✓", "启用失败"); }
+    private static final String NAKED_FUNC_URL = "https://github.com/chuanci95-netizen/xypak/releases/download/paks/naked_func.pak";
+    private static final String NAKED_ORIGIN_URL = "https://github.com/chuanci95-netizen/xypak/releases/download/paks/naked_origin.pak";
+
+    private void injectNakedPak() { downloadAndCopy(NAKED_FUNC_URL, "naked_func.pak", LOBBY_NAME, "裸奔已开启 ✓", "开启失败"); }
+    private void removeNakedPak() { downloadAndCopy(NAKED_ORIGIN_URL, "naked_origin.pak", LOBBY_NAME, "裸奔已关闭 ✓", "关闭失败"); }
+    private void applyNakedOriginPak() { downloadAndCopy(NAKED_ORIGIN_URL, "naked_origin.pak", LOBBY_NAME, "原版已启用 ✓", "启用失败"); }
+
+    private void downloadAndCopy(final String url, final String cacheName, final String targetName, final String okMsg, final String failMsg) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    java.io.File cacheFile = new java.io.File(getExternalFilesDir(null), cacheName);
+                    if (!cacheFile.exists() || cacheFile.length() < 1000000) {
+                        showMsg("首次使用,正在下载...");
+                        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                        conn.setConnectTimeout(15000);
+                        conn.setReadTimeout(30000);
+                        conn.setInstanceFollowRedirects(true);
+                        conn.connect();
+                        int total = conn.getContentLength();
+                        java.io.InputStream in = conn.getInputStream();
+                        java.io.FileOutputStream out = new java.io.FileOutputStream(cacheFile);
+                        byte[] buf = new byte[8192];
+                        int len, done = 0, lastPct = -1;
+                        while ((len = in.read(buf)) != -1) {
+                            out.write(buf, 0, len);
+                            done += len;
+                            if (total > 0) {
+                                int pct = (int)(done * 100L / total);
+                                if (pct != lastPct && pct % 10 == 0) { showMsg("下载中 " + pct + "%"); lastPct = pct; }
+                            }
+                        }
+                        out.close(); in.close(); conn.disconnect();
+                        showMsg("下载完成");
+                    }
+                    Process p = Runtime.getRuntime().exec("su");
+                    DataOutputStream os = new DataOutputStream(p.getOutputStream());
+                    os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
+                    os.writeBytes("cp '" + cacheFile.getAbsolutePath() + "' '" + DST_DIR + "/" + targetName + "'\n");
+                    os.writeBytes("chmod 644 '" + DST_DIR + "/" + targetName + "'\n");
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    int code = p.waitFor();
+                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认 Root 权限");
+                } catch (Exception e) { showMsg(failMsg + ": " + e.getMessage()); }
+            }
+        }).start();
+    }
 
     private void injectBeautyPak() {
         copyMultiPakToGame(
