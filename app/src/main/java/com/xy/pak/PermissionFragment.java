@@ -159,7 +159,7 @@ public class PermissionFragment extends Fragment {
     }
 
     private SharedPreferences getPrefs() {
-        return requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return getContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
     private void updateUI() {
@@ -194,7 +194,7 @@ public class PermissionFragment extends Fragment {
 
     /** 检查 Shizuku 是否安装（兼容多个包名） */
     private boolean isShizukuInstalled() {
-        PackageManager pm = requireContext().getPackageManager();
+        PackageManager pm = getContext().getPackageManager();
         for (String pkg : SHIZUKU_PKGS) {
             try {
                 pm.getPackageInfo(pkg, 0);
@@ -237,7 +237,7 @@ public class PermissionFragment extends Fragment {
     /** 检查某个 App 是否安装 */
     private boolean isAppInstalled(String pkg) {
         try {
-            requireContext().getPackageManager().getPackageInfo(pkg, 0);
+            getContext().getPackageManager().getPackageInfo(pkg, 0);
             return true;
         } catch (Exception e) {
             return false;
@@ -246,7 +246,7 @@ public class PermissionFragment extends Fragment {
 
     /** 打开 Shizuku 应用 */
     private void launchShizuku() {
-        PackageManager pm = requireContext().getPackageManager();
+        PackageManager pm = getContext().getPackageManager();
         for (String pkg : SHIZUKU_PKGS) {
             Intent intent = pm.getLaunchIntentForPackage(pkg);
             if (intent != null) {
@@ -260,7 +260,7 @@ public class PermissionFragment extends Fragment {
     /** 从 assets 安装 Shizuku */
     private void installShizukuFromAssets() {
         try {
-            Context ctx = requireContext();
+            Context ctx = getContext();
             File outFile = new File(ctx.getExternalCacheDir(), "shizuku.apk");
 
             InputStream in = ctx.getAssets().open("shizuku.apk");
