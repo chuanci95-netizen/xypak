@@ -48,7 +48,7 @@ public class FloatingService extends Service {
     // 路径常量
     private static final String SRC_DIR = "/storage/emulated/0/和平PAK文件/内透[红]";
     private static final String DST_DIR = "/storage/emulated/0/Android/data/com.tencent.tmgp.pubgmhd/files/UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Saved/Paks";
-    private static final String PAK_NAME = "game_patch_1_36_11_15380.pak";
+    private static final String PAK_NAME = "game_patch_1.36.11.15380.pak";
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
