@@ -175,33 +175,36 @@
             <LinearLayout
                 android:id="@+id/page_safe"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:gravity="center"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🛡"
-                    android:textSize="40sp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" android:background="@drawable/bg_inject_green" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/ic_safe_desktop"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="10dp" android:text="桌面开启" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
+                    <FrameLayout android:id="@+id/safe_sw1" android:layout_width="44dp" android:layout_height="24dp">
+                        <View android:id="@+id/safe_track1" android:layout_width="44dp" android:layout_height="24dp" android:background="@drawable/switch_track_off"/>
+                        <View android:id="@+id/safe_thumb1" android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center_vertical|left" android:layout_marginLeft="2dp" android:background="@drawable/switch_thumb"/>
+                    </FrameLayout>
+                </LinearLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="防封区域"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:textStyle="bold"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" android:background="@drawable/bg_inject_blue" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/ic_safe_lobby"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="10dp" android:text="大厅开启" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
+                    <FrameLayout android:id="@+id/safe_sw2" android:layout_width="44dp" android:layout_height="24dp">
+                        <View android:id="@+id/safe_track2" android:layout_width="44dp" android:layout_height="24dp" android:background="@drawable/switch_track_off"/>
+                        <View android:id="@+id/safe_thumb2" android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center_vertical|left" android:layout_marginLeft="2dp" android:background="@drawable/switch_thumb"/>
+                    </FrameLayout>
+                </LinearLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="（开发中）"
-                    android:textColor="#666"
-                    android:textSize="12sp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" android:background="@drawable/bg_inject_red" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/ic_safe_offline"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="10dp" android:text="下线关闭防封" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
+                    <FrameLayout android:id="@+id/safe_sw3" android:layout_width="44dp" android:layout_height="24dp">
+                        <View android:id="@+id/safe_track3" android:layout_width="44dp" android:layout_height="24dp" android:background="@drawable/switch_track_off"/>
+                        <View android:id="@+id/safe_thumb3" android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center_vertical|left" android:layout_marginLeft="2dp" android:background="@drawable/switch_thumb"/>
+                    </FrameLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- 设置区域 -->

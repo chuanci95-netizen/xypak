@@ -176,6 +176,27 @@ public class FloatingService extends Service {
                     }
                 });
             }
+
+            // 防封列表开关
+            int[] sSwIds = {R.id.safe_sw1, R.id.safe_sw2, R.id.safe_sw3};
+            int[] sTrackIds = {R.id.safe_track1, R.id.safe_track2, R.id.safe_track3};
+            int[] sThumbIds = {R.id.safe_thumb1, R.id.safe_thumb2, R.id.safe_thumb3};
+            final String[] safeNames = {"桌面开启", "大厅开启", "下线关闭防封"};
+            final boolean[] safeOn = new boolean[3];
+            for (int i = 0; i < 3; i++) {
+                final View strack = floatView.findViewById(sTrackIds[i]);
+                final View sthumb = floatView.findViewById(sThumbIds[i]);
+                final int sidx = i;
+                floatView.findViewById(sSwIds[i]).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        safeOn[sidx] = !safeOn[sidx];
+                        updateSwitch(strack, sthumb, safeOn[sidx], 44);
+                        if (safeOn[sidx]) { showMsg(safeNames[sidx] + " 开启成功"); playBeep(); }
+                        else { showMsg(safeNames[sidx] + " 已关闭"); }
+                    }
+                });
+            }
         int[] tileIds = {R.id.tile1, R.id.tile2, R.id.tile3, R.id.tile4, R.id.tile5, R.id.tile6};
         for (int i = 0; i < 6; i++) {
             final int idx = i;
