@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.BatteryManager;
-import android.media.ToneGenerator;
-import android.media.AudioManager;
+import android.speech.tts.TextToSpeech;
+import java.util.Locale;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -46,6 +46,7 @@ public class FloatingService extends Service {
 
     // 内透[红] 开关状态
     private boolean[] injectOn = new boolean[4];
+    private TextToSpeech tts;
 
     // 路径常量
     private static final String SRC_DIR = "/storage/emulated/0/和平PAK文件/内透[红]";
@@ -59,6 +60,14 @@ public class FloatingService extends Service {
     public void onCreate() {
         super.onCreate();
         isRunning = true;
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS && tts != null) {
+                    tts.setLanguage(Locale.CHINESE);
+                }
+            }
+        });
         showFloat();
     }
 
@@ -66,6 +75,7 @@ public class FloatingService extends Service {
     public void onDestroy() {
         super.onDestroy();
         isRunning = false;
+        if (tts != null) { tts.stop(); tts.shutdown(); tts = null; }
         if (floatView != null && wm != null) {
             try { wm.removeView(floatView); } catch (Exception e) {}
         }
@@ -144,10 +154,10 @@ public class FloatingService extends Service {
                         injectOn[idx] = !injectOn[idx];
                         updateSwitch(track, thumb, injectOn[idx], 44);
                         if (idx == 1) {
-                            if (injectOn[idx]) { injectPakFile(); playBeep(); }
+                            if (injectOn[idx]) { injectPakFile(); speak(injectNames[idx]); }
                             else removePakFile();
                         } else {
-                            if (injectOn[idx]) { showMsg(injectNames[idx] + " 开启成功"); playBeep(); } else { showMsg(injectNames[idx] + " 已关闭"); }
+                            if (injectOn[idx]) { showMsg(injectNames[idx] + " 开启成功"); speak(injectNames[idx]); } else { showMsg(injectNames[idx] + " 已关闭"); }
                         }
                     }
                 });
@@ -168,7 +178,7 @@ public class FloatingService extends Service {
                     public void onClick(View v) {
                         originOn[oidx] = !originOn[oidx];
                         updateSwitch(otrack, othumb, originOn[oidx], 44);
-                        if (originOn[oidx]) { showMsg(originNames[oidx] + " 开启成功"); playBeep(); }
+                        if (originOn[oidx]) { showMsg(originNames[oidx] + " 开启成功"); speak(originNames[oidx]); }
                         else { showMsg(originNames[oidx] + " 已关闭"); }
                     }
                 });
@@ -334,13 +344,11 @@ public class FloatingService extends Service {
         }).start();
     }
 
-    private void playBeep() {
+    private void speak(String name) {
         try {
-            ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 90);
-            tg.startTone(ToneGenerator.TONE_PROP_BEEP, 150);
-            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override public void run() { tg.release(); }
-            }, 300);
+            if (tts != null) {
+                tts.speak(name + "开启成功", TextToSpeech.QUEUE_FLUSH, null, "xy");
+            }
         } catch (Exception e) {}
     }
 
