@@ -37,7 +37,7 @@ public class FloatingService extends Service {
     private boolean expanded = false;
 
     private boolean[] tileOn = new boolean[6];
-    private final String[] tileNames = {"悬浮窗", "游戏模式", "清理后台", "120Hz", "免打扰", "状态栏"};
+    private final String[] tileNames = {"悬浮窗", "游戏模式", "清理后台", "开启最高帧率", "免打扰", "状态栏"};
     private final int[] tileIcons = {
             R.drawable.ic_rocket, R.drawable.ic_bolt, R.drawable.ic_refresh,
             R.drawable.ic_wrench, R.drawable.ic_bell, R.drawable.ic_lock_status
@@ -216,6 +216,7 @@ public class FloatingService extends Service {
                 public void onClick(View v) {
                     tileOn[idx] = !tileOn[idx];
                     updateSwitch(track, thumb, tileOn[idx], 40);
+                    applyTile(idx, tileOn[idx]);
                 }
             });
         }
@@ -374,6 +375,93 @@ public class FloatingService extends Service {
                 Toast.makeText(FloatingService.this, msg, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private int getMaxRefreshRate() {
+        try {
+            android.view.WindowManager wm =
+                (android.view.WindowManager) getSystemService(WINDOW_SERVICE);
+            android.view.Display.Mode[] modes =
+                wm.getDefaultDisplay().getSupportedModes();
+            float max = 60f;
+            for (android.view.Display.Mode m : modes) {
+                if (m.getRefreshRate() > max) max = m.getRefreshRate();
+            }
+            return Math.round(max);
+        } catch (Throwable e) {
+            return 120;
+        }
+    }
+
+    private void applyTile(int idx, boolean on) {
+        final String cmd;
+        final String okMsg;
+        switch (idx) {
+            case 0: // 悬浮窗 - 保持原逻辑,不发命令
+                return;
+            case 1: // 游戏模式
+                cmd = on ? "settings put system game_mode 1"
+                         : "settings put system game_mode 0";
+                okMsg = on ? "游戏模式 已开启" : "游戏模式 已关闭";
+                break;
+            case 2: // 清理后台 - 点一下执行,不保持状态
+                cmd = "am kill-all";
+                okMsg = "后台已清理";
+                tileOn[2] = false;
+                break;
+            case 3: // 最高帧率 - 读取系统支持的最高刷新率
+                if (on) {
+                    int maxHz = getMaxRefreshRate();
+                    cmd = "settings put system peak_refresh_rate " + maxHz
+                        + " && settings put system min_refresh_rate " + maxHz;
+                    okMsg = "已开启最高帧率 " + maxHz + "Hz";
+                } else {
+                    cmd = "settings put system peak_refresh_rate 60"
+                        + " && settings put system min_refresh_rate 60";
+                    okMsg = "已恢复 60Hz";
+                }
+                break;
+            case 4: // 免打扰
+                cmd = on ? "cmd notification set_dnd priority"
+                         : "cmd notification set_dnd off";
+                okMsg = on ? "免打扰 已开启" : "免打扰 已关闭";
+                break;
+            case 5: // 状态栏 - 隐藏/恢复
+                cmd = on ? "settings put global policy_control immersive.status=*"
+                         : "settings put global policy_control null";
+                okMsg = on ? "状态栏 已隐藏" : "状态栏 已恢复";
+                break;
+            default:
+                return;
+        }
+        final boolean clearTile2 = (idx == 2);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String res = CmdExec.run(cmd);
+                if (floatView != null) {
+                    floatView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if ("NO_PERMISSION".equals(res)) {
+                                showMsg("需要 Root 或 Shizuku 授权");
+                            } else if (res != null && res.startsWith("ERR")) {
+                                showMsg("执行失败");
+                            } else {
+                                showMsg(okMsg);
+                                playBeep();
+                            }
+                            if (clearTile2) {
+                                updateSwitch(
+                                    (View) floatView.findViewById(R.id.tile3).findViewById(R.id.tile_track),
+                                    (View) floatView.findViewById(R.id.tile3).findViewById(R.id.tile_thumb),
+                                    false, 40);
+                            }
+                        }
+                    });
+                }
+            }
+        }).start();
     }
 
     private void updateSwitch(View track, View thumb, boolean on, int trackWidthDp) {
