@@ -81,7 +81,6 @@
 
             <!-- 注入列表 -->
             <LinearLayout
-            <LinearLayout
                 android:id="@+id/page_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -130,7 +129,6 @@
                         </FrameLayout>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
             </LinearLayout>
 
             <!-- 防封区域 -->
