@@ -217,7 +217,7 @@ public class PermissionFragment extends Fragment {
         if (installed) {
             try {
                 if (Shizuku.pingBinder()) {
-                    txtBottomHint.setText("Shizuku 运行中 ✓");
+                    txtBottomHint.setText("运行中 ✓");
                     txtBottomHint.setTextColor(0xFF4CAF50);
                     return;
                 }
