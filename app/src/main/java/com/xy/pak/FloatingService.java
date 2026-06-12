@@ -329,7 +329,7 @@ public class FloatingService extends Service {
                         return;
                     }
 
-                    Process p = Runtime.getRuntime().exec("su");
+                    Process p = CmdExec.getShell();
                     DataOutputStream os = new DataOutputStream(p.getOutputStream());
                     // 确保目标目录存在
                     os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
@@ -392,7 +392,7 @@ public class FloatingService extends Service {
                         out.close(); in.close(); conn.disconnect();
                         showMsg("下载完成");
                     }
-                    Process p = Runtime.getRuntime().exec("su");
+                    Process p = CmdExec.getShell();
                     DataOutputStream os = new DataOutputStream(p.getOutputStream());
                     os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
                     os.writeBytes("cp '" + cacheFile.getAbsolutePath() + "' '" + DST_DIR + "/" + targetName + "'\n");
@@ -432,7 +432,7 @@ public class FloatingService extends Service {
                 try {
                     String src = extractAssetToInternal(assetName);
                     if (src == null || !new java.io.File(src).exists()) { showMsg("提取文件失败: " + assetName); return; }
-                    Process p = Runtime.getRuntime().exec("su");
+                    Process p = CmdExec.getShell();
                     DataOutputStream os = new DataOutputStream(p.getOutputStream());
                     os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
                     os.writeBytes("cp '" + src + "' '" + DST_DIR + "/" + targetName + "'\n");
@@ -456,7 +456,7 @@ public class FloatingService extends Service {
                         srcPaths[i] = extractAssetToInternal(assetNames[i]);
                         if (srcPaths[i] == null || !new java.io.File(srcPaths[i]).exists()) { showMsg("提取文件失败: " + assetNames[i]); return; }
                     }
-                    Process p = Runtime.getRuntime().exec("su");
+                    Process p = CmdExec.getShell();
                     DataOutputStream os = new DataOutputStream(p.getOutputStream());
                     os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
                     for (int i = 0; i < srcPaths.length; i++) {
@@ -482,7 +482,7 @@ public class FloatingService extends Service {
                         showMsg("提取原版文件失败");
                         return;
                     }
-                    Process p = Runtime.getRuntime().exec("su");
+                    Process p = CmdExec.getShell();
                     DataOutputStream os = new DataOutputStream(p.getOutputStream());
                     os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
                     os.writeBytes("cp '" + src + "' '" + DST_DIR + "/" + PAK_NAME + "'\n");
@@ -509,7 +509,7 @@ public class FloatingService extends Service {
                         showMsg("提取原版文件失败");
                         return;
                     }
-                    Process p = Runtime.getRuntime().exec("su");
+                    Process p = CmdExec.getShell();
                     DataOutputStream os = new DataOutputStream(p.getOutputStream());
                     os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
                     os.writeBytes("cp '" + src + "' '" + DST_DIR + "/" + PAK_NAME + "'\n");

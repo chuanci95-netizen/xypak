@@ -262,7 +262,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="12dp"
                         android:layout_weight="1"
-                        android:text="使用方法:先去快手搜【shizuku教程】,按照教程弄好之后,官方授权的应用选【MT管理器】给注入软件;记得给注入软件【悬浮窗权限】;桌面开功能,上游戏即可生效。"
+                        android:text="使用方法:先去快手搜【shizuku教程】,按照教程弄好之后,官方授权的应用选【MT管理器】和【小月自动注入】;还有记得给自动注入软件【悬浮窗权限】;桌面开功能,上游戏即可生效。"
                         android:textColor="#222"
                         android:textSize="14sp"/>
                 </LinearLayout>

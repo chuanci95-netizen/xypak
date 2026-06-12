@@ -60,4 +60,19 @@ public class CmdExec {
             return sb.toString();
         } catch (Throwable e) { return "ERR:" + e.getMessage(); }
     }
+
+    // 返回一个可写命令的 shell 进程:优先 Root,其次 Shizuku
+    public static Process getShell() throws Exception {
+        if (hasRoot()) {
+            return Runtime.getRuntime().exec("su");
+        }
+        if (hasShizuku()) {
+            java.lang.Class<?> sz = Class.forName("rikka.shizuku.Shizuku");
+            java.lang.reflect.Method m = sz.getDeclaredMethod(
+                "newProcess", String[].class, String[].class, String.class);
+            m.setAccessible(true);
+            return (Process) m.invoke(null, new String[]{"sh"}, null, null);
+        }
+        throw new Exception("无 Root 或 Shizuku 权限");
+    }
 }
