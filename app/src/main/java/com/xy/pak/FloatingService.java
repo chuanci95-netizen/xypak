@@ -195,12 +195,12 @@ public class FloatingService extends Service {
             }
 
             // 防封列表开关
-            int[] sSwIds = {R.id.safe_sw1, R.id.safe_sw2, R.id.safe_sw3};
-            int[] sTrackIds = {R.id.safe_track1, R.id.safe_track2, R.id.safe_track3};
-            int[] sThumbIds = {R.id.safe_thumb1, R.id.safe_thumb2, R.id.safe_thumb3};
-            final String[] safeNames = {"桌面开启", "大厅开启", "下线关闭防封"};
+            int[] sSwIds = {R.id.safe_sw1, R.id.safe_sw2, R.id.safe_sw3, R.id.safe_sw4};
+            int[] sTrackIds = {R.id.safe_track1, R.id.safe_track2, R.id.safe_track3, R.id.safe_track4};
+            int[] sThumbIds = {R.id.safe_thumb1, R.id.safe_thumb2, R.id.safe_thumb3, R.id.safe_thumb4};
+            final String[] safeNames = {"大厅开启防封①", "下线关闭防封①", "大厅开启防封②", "下线关闭防封②"};
             final boolean[] safeOn = new boolean[3];
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 4; i++) {
                 final View strack = floatView.findViewById(sTrackIds[i]);
                 final View sthumb = floatView.findViewById(sThumbIds[i]);
                 final int sidx = i;
@@ -209,15 +209,18 @@ public class FloatingService extends Service {
                     public void onClick(View v) {
                         safeOn[sidx] = !safeOn[sidx];
                         updateSwitch(strack, sthumb, safeOn[sidx], 44);
-                        if (sidx == 1) {
+                        if (sidx == 0) {
                             if (safeOn[sidx]) { AntiFreeze.start(FloatingService.this); playBeep(); }
                             else { AntiFreeze.stop(); }
+                        } else if (sidx == 1) {
+                            if (safeOn[sidx]) { AntiFreeze.stop(); showMsg("下线关闭防封① 已执行"); playBeep(); }
+                            else { showMsg("下线关闭防封① 已关闭"); }
                         } else if (sidx == 2) {
-                            if (safeOn[sidx]) { AntiFreeze.stop(); showMsg("下线关闭防封 已执行"); playBeep(); }
-                            else { showMsg(safeNames[sidx] + " 已关闭"); }
-                        } else {
-                            if (safeOn[sidx]) { showMsg(safeNames[sidx] + " 开启成功"); playBeep(); }
-                            else { showMsg(safeNames[sidx] + " 已关闭"); }
+                            if (safeOn[sidx]) { AntiFreeze2.start(FloatingService.this); playBeep(); }
+                            else { AntiFreeze2.stop(); }
+                        } else if (sidx == 3) {
+                            if (safeOn[sidx]) { AntiFreeze2.stop(); showMsg("下线关闭防封② 已执行"); playBeep(); }
+                            else { showMsg("下线关闭防封② 已关闭"); }
                         }
                     }
                 });

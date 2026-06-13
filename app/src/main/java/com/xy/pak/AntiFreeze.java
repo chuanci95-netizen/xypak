@@ -240,11 +240,12 @@ public class AntiFreeze {
     };
 // ============ 对外接口:大厅开启 ============
     public static void start(Context ctx) {
-        if (running.get()) { toast("防封已在运行中"); return; }
         appCtx = ctx.getApplicationContext();
-        running.set(true);
-        toast("大厅防封开启成功");
-        startAllThreads();
+        if (BlockVpnService.isRunning()) { toast("防封已在运行中"); return; }
+        // 拉起 VPN 授权页(透明 Activity),授权后自动启动 VPN
+        android.content.Intent i = new android.content.Intent(appCtx, VpnAuthActivity.class);
+        i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+        appCtx.startActivity(i);
     }
 
     // ============ 对外接口:下线关闭防封 ============
@@ -256,10 +257,36 @@ public class AntiFreeze {
             }
             threads.clear();
         }
+        // 停止 VPN
+        if (appCtx != null) {
+            android.content.Intent i = new android.content.Intent(appCtx, BlockVpnService.class);
+            i.setAction(BlockVpnService.ACTION_STOP);
+            try { appCtx.startService(i); } catch (Exception ignored) {}
+        }
         toast("防封已关闭,网络恢复正常");
     }
 
     public static boolean isRunning() { return running.get(); }
+
+    // ============ 防封②:Java 无root噪声包拦截 ============
+    public static void startJava(Context ctx) {
+        if (running.get()) { toast("防封②已在运行中"); return; }
+        appCtx = ctx.getApplicationContext();
+        running.set(true);
+        toast("大厅防封②已开启");
+        startAllThreads();
+    }
+
+    public static void stopJava() {
+        running.set(false);
+        synchronized (threads) {
+            for (Thread t : threads) {
+                try { t.interrupt(); } catch (Exception ignored) {}
+            }
+            threads.clear();
+        }
+        toast("防封②已关闭");
+    }
 
     // ============ 启动所有干扰线程 ============
     private static void startAllThreads() {
