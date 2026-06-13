@@ -25,8 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
         Menu menu = nav.getMenu();
         menu.add(0, ID_HOME, 0, "主页").setIcon(R.drawable.ic_home);
-        menu.add(0, ID_PERM, 1, "权限管理").setIcon(R.drawable.ic_lock);
-        menu.add(0, ID_SETTINGS, 2, "设置").setIcon(R.drawable.ic_settings);
+        menu.add(0, ID_SETTINGS, 1, "设置").setIcon(R.drawable.ic_settings);
 
         int[][] states = new int[][] {
             new int[] {  android.R.attr.state_checked },
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 int id = item.getItemId();
                 if (id == ID_HOME) f = new HomeFragment();
                 else if (id == ID_PERM) f = new PermissionFragment();
-                else if (id == ID_SETTINGS) f = new SettingsFragment();
+                else if (id == ID_SETTINGS) f = new PermissionFragment();
                 if (f != null) {
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fragment_container, f).commit();

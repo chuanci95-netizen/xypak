@@ -72,21 +72,7 @@ public class PermissionFragment extends Fragment {
 
         // Root 模式
         v.findViewById(R.id.card_root).setOnClickListener(view -> {
-            if (rootGranted) {
-                rootGranted = false;
-                saveMode("");
-                Toast.makeText(getContext(), "已取消 Root", Toast.LENGTH_SHORT).show();
-            } else {
-                if (requestRoot()) {
-                    rootGranted = true;
-                    shizukuGranted = false;
-                    saveMode("root");
-                    Toast.makeText(getContext(), "Root 权限已获取", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Root 不可用，请确认设备已 Root", Toast.LENGTH_LONG).show();
-                }
-            }
-            updateUI();
+            Toast.makeText(getContext(), "本版本仅支持 Shizuku 模式,请选择下方 Shizuku", Toast.LENGTH_LONG).show();
         });
 
         // Shizuku 模式
