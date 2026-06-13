@@ -33,7 +33,7 @@ public class PermissionFragment extends Fragment {
     private boolean rootGranted = false;
     private boolean shizukuGranted = false;
 
-    private View checkRoot, checkShizuku;
+    private View checkShizuku;
     private TextView progressText, txtBottomHint, toolInstallTitle, toolInstallDesc;
     private ProgressBar progressBar;
 
@@ -56,7 +56,6 @@ public class PermissionFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_permission, container, false);
 
-        checkRoot = v.findViewById(R.id.check_root);
         checkShizuku = v.findViewById(R.id.check_shizuku);
         progressText = v.findViewById(R.id.progress_text);
         progressBar = v.findViewById(R.id.progress_bar);
@@ -71,10 +70,6 @@ public class PermissionFragment extends Fragment {
         Shizuku.addRequestPermissionResultListener(permListener);
 
         // Root 模式
-        v.findViewById(R.id.card_root).setOnClickListener(view -> {
-            Toast.makeText(getContext(), "本版本仅支持 Shizuku 模式,请选择下方 Shizuku", Toast.LENGTH_LONG).show();
-        });
-
         // Shizuku 模式
         v.findViewById(R.id.card_shizuku).setOnClickListener(view -> {
             if (!isShizukuInstalled()) {
@@ -175,13 +170,9 @@ public class PermissionFragment extends Fragment {
     }
 
     private void updateUI() {
-        checkRoot.setVisibility(rootGranted ? View.VISIBLE : View.INVISIBLE);
         checkShizuku.setVisibility(shizukuGranted ? View.VISIBLE : View.INVISIBLE);
 
-        if (rootGranted) {
-            progressText.setText("已选择 Root 模式");
-            progressBar.setProgress(100);
-        } else if (shizukuGranted) {
+        if (shizukuGranted) {
             progressText.setText("已选择 Shizuku 模式");
             progressBar.setProgress(100);
         } else {
