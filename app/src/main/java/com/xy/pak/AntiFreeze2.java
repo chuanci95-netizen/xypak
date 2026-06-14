@@ -1183,28 +1183,50 @@ public class AntiFreeze2 {
     }
 
     private static void installCrashCatcher() {
+        final Thread.UncaughtExceptionHandler old = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override public void uncaughtException(Thread t, Throwable e) {
-                try {
-                    java.io.File dir = (appCtx != null) ? appCtx.getExternalFilesDir(null) : null;
-                    java.io.File f = (dir != null) ? new java.io.File(dir, "崩溃.txt") : new java.io.File("/sdcard/小月崩溃.txt");
-                    java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(f, false));
-                    pw.println("线程: " + t.getName());
-                    pw.println("异常: " + e.toString());
-                    for (StackTraceElement s : e.getStackTrace()) {
-                        pw.println("    at " + s.toString());
-                    }
-                    Throwable cause = e.getCause();
-                    if (cause != null) {
-                        pw.println("原因: " + cause.toString());
-                        for (StackTraceElement s : cause.getStackTrace()) {
-                            pw.println("    at " + s.toString());
-                        }
-                    }
-                    pw.flush(); pw.close();
-                } catch (Throwable ignored) {}
+                writeCrash(t, e);
+                if (old != null) old.uncaughtException(t, e);
             }
         });
+    }
+
+    private static void writeCrash(Thread t, Throwable e) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            sb.append("线程: ").append(t.getName()).append("\n");
+            sb.append("异常: ").append(e.toString()).append("\n");
+            for (StackTraceElement s : e.getStackTrace()) sb.append("    at ").append(s.toString()).append("\n");
+            Throwable c = e.getCause();
+            while (c != null) {
+                sb.append("原因: ").append(c.toString()).append("\n");
+                for (StackTraceElement s : c.getStackTrace()) sb.append("    at ").append(s.toString()).append("\n");
+                c = c.getCause();
+            }
+        } catch (Throwable ignored) {}
+        String content = sb.toString();
+        // 尝试多个路径,哪个成哪个
+        String[] paths = {
+            "/sdcard/小月崩溃.txt",
+            "/storage/emulated/0/小月崩溃.txt",
+            "/storage/emulated/0/Download/小月崩溃.txt"
+        };
+        for (String path : paths) {
+            try {
+                java.io.FileWriter fw = new java.io.FileWriter(path, false);
+                fw.write(content); fw.flush(); fw.close();
+            } catch (Throwable ignored) {}
+        }
+        if (appCtx != null) {
+            try {
+                java.io.File dir = appCtx.getExternalFilesDir(null);
+                if (dir != null) {
+                    java.io.FileWriter fw = new java.io.FileWriter(new java.io.File(dir, "崩溃.txt"), false);
+                    fw.write(content); fw.flush(); fw.close();
+                }
+            } catch (Throwable ignored) {}
+        }
     }
 
     public static void stop() {
