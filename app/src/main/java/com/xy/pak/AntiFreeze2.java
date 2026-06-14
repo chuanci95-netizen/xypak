@@ -1186,7 +1186,8 @@ public class AntiFreeze2 {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override public void uncaughtException(Thread t, Throwable e) {
                 try {
-                    java.io.File f = new java.io.File("/sdcard/小月崩溃.txt");
+                    java.io.File dir = (appCtx != null) ? appCtx.getExternalFilesDir(null) : null;
+                    java.io.File f = (dir != null) ? new java.io.File(dir, "崩溃.txt") : new java.io.File("/sdcard/小月崩溃.txt");
                     java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(f, false));
                     pw.println("线程: " + t.getName());
                     pw.println("异常: " + e.toString());
