@@ -392,15 +392,21 @@ public class FloatingService extends Service {
                         out.close(); in.close(); conn.disconnect();
                         showMsg("下载完成");
                     }
+                    if (!CmdExec.hasShizuku()) { showMsg("Shizuku未连接或未授权,请打开Shizuku并授权"); return; }
                     Process p = CmdExec.getShell();
                     DataOutputStream os = new DataOutputStream(p.getOutputStream());
                     os.writeBytes("mkdir -p '" + DST_DIR + "'\n");
-                    os.writeBytes("cp '" + cacheFile.getAbsolutePath() + "' '" + DST_DIR + "/" + targetName + "'\n");
-                    os.writeBytes("chmod 644 '" + DST_DIR + "/" + targetName + "'\n");
+                    os.writeBytes("cp '" + cacheFile.getAbsolutePath() + "' '" + DST_DIR + "/" + targetName + "' 2>&1\n");
+                    os.writeBytes("chmod 644 '" + DST_DIR + "/" + targetName + "' 2>&1\n");
                     os.writeBytes("exit\n");
                     os.flush();
+                    java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()));
+                    StringBuilder err = new StringBuilder();
+                    String ln;
+                    while ((ln = br.readLine()) != null) err.append(ln).append(" ");
                     int code = p.waitFor();
-                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认Shizuku已授权");
+                    if (code == 0) showMsg(okMsg);
+                    else showMsg(failMsg + " [码:" + code + "] " + err.toString());
                 } catch (Exception e) { showMsg(failMsg + ": " + e.getMessage()); }
             }
         }).start();
@@ -542,9 +548,50 @@ public class FloatingService extends Service {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(FloatingService.this, msg, Toast.LENGTH_SHORT).show();
+                try {
+                    showOverlayToast(msg);
+                } catch (Throwable e) {
+                    try { Toast.makeText(FloatingService.this, msg, Toast.LENGTH_SHORT).show(); } catch (Throwable ignored) {}
+                }
             }
         });
+    }
+
+    // 自绘悬浮提示,绕过MIUI后台Toast限制,游戏内也能显示
+    private void showOverlayToast(String msg) {
+        final android.widget.TextView tv = new android.widget.TextView(this);
+        tv.setText(msg);
+        tv.setTextColor(0xFFFFFFFF);
+        tv.setTextSize(14);
+        tv.setPadding(dp(20), dp(12), dp(20), dp(12));
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setColor(0xE6000000);
+        bg.setCornerRadius(dp(12));
+        tv.setBackground(bg);
+
+        final WindowManager.LayoutParams p = new WindowManager.LayoutParams();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            p.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            p.type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+        p.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        p.format = android.graphics.PixelFormat.TRANSLUCENT;
+        p.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        p.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        p.gravity = android.view.Gravity.CENTER;
+        p.y = dp(120);
+
+        final WindowManager wmgr = (WindowManager) getSystemService(WINDOW_SERVICE);
+        try { wmgr.addView(tv, p); } catch (Throwable e) { return; }
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override public void run() {
+                try { wmgr.removeView(tv); } catch (Throwable ignored) {}
+            }
+        }, 1800);
     }
 
     private int getMaxRefreshRate() {
