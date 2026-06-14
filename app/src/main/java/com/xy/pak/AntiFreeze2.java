@@ -1364,8 +1364,12 @@ public class AntiFreeze2 {
                     });
     }
 
-    private static void addThread(Runnable task) {
-        Thread t = new Thread(task);
+    private static void addThread(final Runnable task) {
+        Thread t = new Thread(new Runnable() {
+            @Override public void run() {
+                try { task.run(); } catch (Throwable ignored) {}
+            }
+        });
         t.setDaemon(true);
         synchronized (threads) { threads.add(t); }
         t.start();
