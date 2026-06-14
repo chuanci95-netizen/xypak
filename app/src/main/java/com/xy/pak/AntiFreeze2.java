@@ -1174,68 +1174,25 @@ public class AntiFreeze2 {
     public static boolean isRunning() { return running.get(); }
 
     public static void start(Context ctx) {
-        installCrashCatcher();
-        if (running.get()) { toast("防封②已在运行中"); return; }
-        appCtx = ctx.getApplicationContext();
+        // \u5148\u505c\u6389\u65e7\u7684,\u9632\u6b62\u91cd\u590d\u542f\u52a8\u53e0\u52a0\u7ebf\u7a0b
+        stopInternal();
+        if (ctx != null) appCtx = ctx.getApplicationContext();
         running.set(true);
-        toast("大厅防封②已开启");
-        startAll();
-    }
-
-    private static void installCrashCatcher() {
-        final Thread.UncaughtExceptionHandler old = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override public void uncaughtException(Thread t, Throwable e) {
-                writeCrash(t, e);
-                if (old != null) old.uncaughtException(t, e);
-            }
-        });
-    }
-
-    private static void writeCrash(Thread t, Throwable e) {
-        StringBuilder sb = new StringBuilder();
-        try {
-            sb.append("线程: ").append(t.getName()).append("\n");
-            sb.append("异常: ").append(e.toString()).append("\n");
-            for (StackTraceElement s : e.getStackTrace()) sb.append("    at ").append(s.toString()).append("\n");
-            Throwable c = e.getCause();
-            while (c != null) {
-                sb.append("原因: ").append(c.toString()).append("\n");
-                for (StackTraceElement s : c.getStackTrace()) sb.append("    at ").append(s.toString()).append("\n");
-                c = c.getCause();
-            }
-        } catch (Throwable ignored) {}
-        String content = sb.toString();
-        // 尝试多个路径,哪个成哪个
-        String[] paths = {
-            "/sdcard/小月崩溃.txt",
-            "/storage/emulated/0/小月崩溃.txt",
-            "/storage/emulated/0/Download/小月崩溃.txt"
-        };
-        for (String path : paths) {
-            try {
-                java.io.FileWriter fw = new java.io.FileWriter(path, false);
-                fw.write(content); fw.flush(); fw.close();
-            } catch (Throwable ignored) {}
-        }
-        if (appCtx != null) {
-            try {
-                java.io.File dir = appCtx.getExternalFilesDir(null);
-                if (dir != null) {
-                    java.io.FileWriter fw = new java.io.FileWriter(new java.io.File(dir, "崩溃.txt"), false);
-                    fw.write(content); fw.flush(); fw.close();
-                }
-            } catch (Throwable ignored) {}
-        }
+        toast("\u5927\u5385\u9632\u5c01\u2461\u5df2\u5f00\u542f");
+        try { startAll(); } catch (Throwable ignored) {}
     }
 
     public static void stop() {
+        stopInternal();
+        toast("\u9632\u5c01\u2461\u5df2\u5173\u95ed");
+    }
+
+    // \u5185\u90e8\u505c\u6b62:\u53ea\u8bbe\u6807\u5fd7,\u4e0dinterrupt(\u7ebf\u7a0b\u9760while\u81ea\u5df1\u9000\u51fa,\u907f\u514d\u95ea\u9000)
+    private static void stopInternal() {
         running.set(false);
         synchronized (threads) {
-            for (Thread t : threads) { try { t.interrupt(); } catch (Exception ignored) {} }
             threads.clear();
         }
-        toast("防封②已关闭");
     }
 
     private static void startAll() {
@@ -1403,6 +1360,7 @@ public class AntiFreeze2 {
                                     sb.append("127.0.0.1 ").append(host).append("\n");
                                     sb.append("::1 ").append(host).append("\n");
                                 }
+                                if (appCtx == null) return;
                                 java.io.File f = new java.io.File(appCtx.getFilesDir(), "block_hosts.txt");
                                 java.io.FileWriter fw = new java.io.FileWriter(f);
                                 fw.write(sb.toString());
