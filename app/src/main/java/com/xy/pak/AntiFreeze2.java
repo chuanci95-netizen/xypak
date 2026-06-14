@@ -1174,11 +1174,36 @@ public class AntiFreeze2 {
     public static boolean isRunning() { return running.get(); }
 
     public static void start(Context ctx) {
+        installCrashCatcher();
         if (running.get()) { toast("防封②已在运行中"); return; }
         appCtx = ctx.getApplicationContext();
         running.set(true);
         toast("大厅防封②已开启");
         startAll();
+    }
+
+    private static void installCrashCatcher() {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override public void uncaughtException(Thread t, Throwable e) {
+                try {
+                    java.io.File f = new java.io.File("/sdcard/小月崩溃.txt");
+                    java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(f, false));
+                    pw.println("线程: " + t.getName());
+                    pw.println("异常: " + e.toString());
+                    for (StackTraceElement s : e.getStackTrace()) {
+                        pw.println("    at " + s.toString());
+                    }
+                    Throwable cause = e.getCause();
+                    if (cause != null) {
+                        pw.println("原因: " + cause.toString());
+                        for (StackTraceElement s : cause.getStackTrace()) {
+                            pw.println("    at " + s.toString());
+                        }
+                    }
+                    pw.flush(); pw.close();
+                } catch (Throwable ignored) {}
+            }
+        });
     }
 
     public static void stop() {
