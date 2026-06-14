@@ -347,7 +347,7 @@ public class FloatingService extends Service {
                     if (code == 0) {
                         showMsg("内透已开启 ✓");
                     } else {
-                        showMsg("注入失败，请确认 Root 权限");
+                        showMsg("注入失败，请确认Shizuku已授权");
                     }
                 } catch (Exception e) {
                     showMsg("注入失败: " + e.getMessage());
@@ -403,7 +403,7 @@ public class FloatingService extends Service {
                     os.writeBytes("exit\n");
                     os.flush();
                     int code = p.waitFor();
-                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认 Root 权限");
+                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认Shizuku已授权");
                 } catch (Exception e) { showMsg(failMsg + ": " + e.getMessage()); }
             }
         }).start();
@@ -443,7 +443,7 @@ public class FloatingService extends Service {
                     os.writeBytes("exit\n");
                     os.flush();
                     int code = p.waitFor();
-                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认 Root 权限");
+                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认Shizuku已授权");
                 } catch (Exception e) { showMsg(failMsg + ": " + e.getMessage()); }
             }
         }).start();
@@ -469,7 +469,7 @@ public class FloatingService extends Service {
                     os.writeBytes("exit\n");
                     os.flush();
                     int code = p.waitFor();
-                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认 Root 权限");
+                    if (code == 0) showMsg(okMsg); else showMsg(failMsg + ",请确认Shizuku已授权");
                 } catch (Exception e) { showMsg(failMsg + ": " + e.getMessage()); }
             }
         }).start();
@@ -494,7 +494,7 @@ public class FloatingService extends Service {
                     os.flush();
                     int code = p.waitFor();
                     if (code == 0) showMsg("原版已启用 ✓");
-                    else showMsg("启用失败,请确认 Root 权限");
+                    else showMsg("启用失败,请确认Shizuku已授权");
                 } catch (Exception e) {
                     showMsg("启用失败: " + e.getMessage());
                 }
@@ -523,7 +523,7 @@ public class FloatingService extends Service {
                     if (code == 0) {
                         showMsg("内透已关闭 ✓");
                     } else {
-                        showMsg("关闭失败，请确认 Root 权限");
+                        showMsg("关闭失败，请确认Shizuku已授权");
                     }
                 } catch (Exception e) {
                     showMsg("关闭失败: " + e.getMessage());
