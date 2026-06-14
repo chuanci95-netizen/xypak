@@ -199,21 +199,13 @@
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" android:background="@drawable/bg_inject_red" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
                     <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/ic_safe_lobby"/>
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="10dp" android:text=" 大厅开启防封②" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="10dp" android:text=" 大厅开启防封②[开/关]" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
                     <FrameLayout android:id="@+id/safe_sw3" android:layout_width="44dp" android:layout_height="24dp">
                         <View android:id="@+id/safe_track3" android:layout_width="44dp" android:layout_height="24dp" android:background="@drawable/switch_track_off"/>
                         <View android:id="@+id/safe_thumb3" android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center_vertical|left" android:layout_marginLeft="2dp" android:background="@drawable/switch_thumb"/>
                     </FrameLayout>
                 </LinearLayout>
 
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" android:background="@drawable/bg_inject_green" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
-                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/ic_safe_offline"/>
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="10dp" android:text=" 下线关闭防封②" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
-                    <FrameLayout android:id="@+id/safe_sw4" android:layout_width="44dp" android:layout_height="24dp">
-                        <View android:id="@+id/safe_track4" android:layout_width="44dp" android:layout_height="24dp" android:background="@drawable/switch_track_off"/>
-                        <View android:id="@+id/safe_thumb4" android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center_vertical|left" android:layout_marginLeft="2dp" android:background="@drawable/switch_thumb"/>
-                    </FrameLayout>
-                </LinearLayout>
             </LinearLayout>
 
             <!-- 设置区域 -->

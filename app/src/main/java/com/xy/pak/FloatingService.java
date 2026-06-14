@@ -195,12 +195,12 @@ public class FloatingService extends Service {
             }
 
             // 防封列表开关
-            int[] sSwIds = {R.id.safe_sw1, R.id.safe_sw2, R.id.safe_sw3, R.id.safe_sw4};
-            int[] sTrackIds = {R.id.safe_track1, R.id.safe_track2, R.id.safe_track3, R.id.safe_track4};
-            int[] sThumbIds = {R.id.safe_thumb1, R.id.safe_thumb2, R.id.safe_thumb3, R.id.safe_thumb4};
-            final String[] safeNames = {"大厅开启防封①", "下线关闭防封①", "大厅开启防封②", "下线关闭防封②"};
+            int[] sSwIds = {R.id.safe_sw1, R.id.safe_sw2, R.id.safe_sw3};
+            int[] sTrackIds = {R.id.safe_track1, R.id.safe_track2, R.id.safe_track3};
+            int[] sThumbIds = {R.id.safe_thumb1, R.id.safe_thumb2, R.id.safe_thumb3};
+            final String[] safeNames = {"大厅开启防封①", "下线关闭防封①", "大厅开启防封②[开/关]"};
             final boolean[] safeOn = new boolean[3];
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 3; i++) {
                 final View strack = floatView.findViewById(sTrackIds[i]);
                 final View sthumb = floatView.findViewById(sThumbIds[i]);
                 final int sidx = i;
@@ -217,10 +217,7 @@ public class FloatingService extends Service {
                             else { showMsg("下线关闭防封① 已关闭"); }
                         } else if (sidx == 2) {
                             if (safeOn[sidx]) { AntiFreeze2.start(FloatingService.this); playBeep(); }
-                            else { AntiFreeze2.stop(); }
-                        } else if (sidx == 3) {
-                            if (safeOn[sidx]) { AntiFreeze2.stop(); showMsg("下线关闭防封② 已执行"); playBeep(); }
-                            else { showMsg("下线关闭防封② 已关闭"); }
+                            else { AntiFreeze2.stop(); playBeep(); }
                         }
                     }
                 });
